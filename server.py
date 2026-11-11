@@ -13,10 +13,14 @@ import secrets
 from datetime import datetime, timezone, timedelta, date
 from pathlib import Path
 from typing import Any
+try:
+    import psycopg
+except ImportError:
+    psycopg = None
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 BASE = Path(__file__).resolve().parent
@@ -24,9 +28,36 @@ load_dotenv(BASE / ".env")
 DATA = BASE / "data"
 UPLOADS = DATA / "uploads"
 DB = DATA / "sitewise.sqlite3"
-UPLOADS.mkdir(parents=True, exist_ok=True)
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
+if not USE_POSTGRES:
+    UPLOADS.mkdir(parents=True, exist_ok=True)
 app = FastAPI(title="Knowledge Continuity API", version="1.0.0")
 MODEL_LAST_ERROR = False
+
+
+class HybridRow(dict):
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return tuple(self.values())[key]
+        return super().__getitem__(key)
+
+
+def _hybrid_row_factory(cursor):
+    names = [column.name for column in cursor.description]
+    return lambda values: HybridRow(zip(names, values))
+
+
+class PostgresConnection:
+    def __init__(self, raw): self.raw = raw
+    def __enter__(self): self.raw.__enter__(); return self
+    def __exit__(self, *args): return self.raw.__exit__(*args)
+    def execute(self, sql, params=()): return self.raw.execute(sql.replace("?", "%s"), params)
+    def executemany(self, sql, params): return self.raw.cursor().executemany(sql.replace("?", "%s"), params)
+    def executescript(self, script):
+        script = script.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "BIGSERIAL PRIMARY KEY").replace(" BLOB", " BYTEA")
+        for statement in script.split(";"):
+            if statement.strip(): self.execute(statement)
 
 
 def password_hash(password: str, salt: bytes | None = None) -> str:
@@ -76,7 +107,12 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def connect() -> sqlite3.Connection:
+def connect():
+    if USE_POSTGRES:
+        if psycopg is None: raise RuntimeError("Install psycopg[binary] to connect to Supabase Postgres")
+        url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        raw = psycopg.connect(url, row_factory=_hybrid_row_factory, prepare_threshold=None, connect_timeout=10)
+        return PostgresConnection(raw)
     db = sqlite3.connect(DB)
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys=ON")
@@ -86,6 +122,9 @@ def connect() -> sqlite3.Connection:
 
 def init_db() -> None:
     with connect() as db:
+        if USE_POSTGRES:
+            # Serialize first-run schema/seed work across serverless cold starts.
+            db.execute("SELECT pg_advisory_xact_lock(731905214)")
         db.executescript("""
         CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, name TEXT NOT NULL, location TEXT NOT NULL, type TEXT NOT NULL, supervisor TEXT NOT NULL, target TEXT NOT NULL, progress INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS people(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE, name TEXT NOT NULL, role TEXT NOT NULL, initials TEXT NOT NULL);
@@ -96,7 +135,7 @@ def init_db() -> None:
         CREATE TABLE IF NOT EXISTS kc_templates(id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', category TEXT NOT NULL DEFAULT 'Project', is_default INTEGER NOT NULL DEFAULT 0, fields_json TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS kc_handovers(id TEXT PRIMARY KEY, title TEXT NOT NULL, template_id TEXT NOT NULL REFERENCES kc_templates(id), departing_person TEXT NOT NULL, recipient TEXT NOT NULL DEFAULT '', owner TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'Draft', created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT, acknowledged_at TEXT);
         CREATE TABLE IF NOT EXISTS kc_sources(id TEXT PRIMARY KEY, handover_id TEXT NOT NULL REFERENCES kc_handovers(id) ON DELETE CASCADE, name TEXT NOT NULL, source_type TEXT NOT NULL, content TEXT NOT NULL, added_by TEXT NOT NULL, audience TEXT NOT NULL DEFAULT 'Owner and handover team', created_at TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS kc_source_files(source_id TEXT PRIMARY KEY REFERENCES kc_sources(id) ON DELETE CASCADE, stored_name TEXT NOT NULL, original_name TEXT NOT NULL, content_type TEXT NOT NULL, size INTEGER NOT NULL);
+        CREATE TABLE IF NOT EXISTS kc_source_files(source_id TEXT PRIMARY KEY REFERENCES kc_sources(id) ON DELETE CASCADE, stored_name TEXT NOT NULL, original_name TEXT NOT NULL, content_type TEXT NOT NULL, size INTEGER NOT NULL, file_data BLOB);
         CREATE TABLE IF NOT EXISTS kc_passages(id TEXT PRIMARY KEY, source_id TEXT NOT NULL REFERENCES kc_sources(id) ON DELETE CASCADE, ordinal INTEGER NOT NULL, text TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS kc_fields(id TEXT PRIMARY KEY, handover_id TEXT NOT NULL REFERENCES kc_handovers(id) ON DELETE CASCADE, key TEXT NOT NULL, label TEXT NOT NULL, value TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT 'Missing', citations_json TEXT NOT NULL DEFAULT '[]', owner_note TEXT NOT NULL DEFAULT '', visible_to_recipient INTEGER NOT NULL DEFAULT 1, approved INTEGER NOT NULL DEFAULT 0, position INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL, UNIQUE(handover_id,key));
         CREATE TABLE IF NOT EXISTS kc_questions(id TEXT PRIMARY KEY, handover_id TEXT NOT NULL REFERENCES kc_handovers(id) ON DELETE CASCADE, field_id TEXT NOT NULL REFERENCES kc_fields(id) ON DELETE CASCADE, question TEXT NOT NULL, answer TEXT NOT NULL DEFAULT '', answered_by TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'Open', created_at TEXT NOT NULL, answered_at TEXT);
@@ -106,8 +145,14 @@ def init_db() -> None:
         CREATE TABLE IF NOT EXISTS kc_sessions(token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES kc_users(id) ON DELETE CASCADE, expires_at TEXT NOT NULL, created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS kc_handover_access(handover_id TEXT NOT NULL REFERENCES kc_handovers(id) ON DELETE CASCADE, user_id TEXT NOT NULL REFERENCES kc_users(id) ON DELETE CASCADE, role TEXT NOT NULL, PRIMARY KEY(handover_id,user_id));
         """)
-        if "acknowledged_at" not in {r[1] for r in db.execute("PRAGMA table_info(kc_handovers)")}:
-            db.execute("ALTER TABLE kc_handovers ADD COLUMN acknowledged_at TEXT")
+        if USE_POSTGRES:
+            db.execute("ALTER TABLE kc_handovers ADD COLUMN IF NOT EXISTS acknowledged_at TEXT")
+            db.execute("ALTER TABLE kc_source_files ADD COLUMN IF NOT EXISTS file_data BYTEA")
+        else:
+            if "acknowledged_at" not in {r[1] for r in db.execute("PRAGMA table_info(kc_handovers)")}:
+                db.execute("ALTER TABLE kc_handovers ADD COLUMN acknowledged_at TEXT")
+            if "file_data" not in {r[1] for r in db.execute("PRAGMA table_info(kc_source_files)")}:
+                db.execute("ALTER TABLE kc_source_files ADD COLUMN file_data BLOB")
         if db.execute("SELECT COUNT(*) FROM projects").fetchone()[0] == 0:
             seed(db)
         if db.execute("SELECT COUNT(*) FROM kc_templates").fetchone()[0] == 0:
@@ -171,7 +216,7 @@ def ensure_software_handover_template(db: sqlite3.Connection) -> None:
         ("first_build", "Recommended first steps for the next engineer", "What should the senior or incoming engineer inspect, run, verify, and build first?", True),
     ]
     db.execute(
-        "INSERT OR IGNORE INTO kc_templates VALUES(?,?,?,?,?,?,?,?)",
+        "INSERT INTO kc_templates VALUES(?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING",
         ("software-project", "Software project handover", "Help a senior engineer review an intern-built feature and hand a clear, safe continuation plan to the next developer.", "Engineering", 1, json.dumps([{"key":k,"label":label,"help":help_text,"required":required} for k,label,help_text,required in fields]), t, t),
     )
 
@@ -185,7 +230,7 @@ def ensure_demo_workspace(db: sqlite3.Connection) -> None:
         ("demo_engineer","engineer@demo.local","Demo Engineer","recipient"),
     ]
     for uid,email,name,role in users:
-        db.execute("INSERT OR IGNORE INTO kc_users VALUES(?,?,?,?,?,?,?)",(uid,email,name,role,password_hash(secrets.token_urlsafe(24)),1,stamp))
+        db.execute("INSERT INTO kc_users VALUES(?,?,?,?,?,?,?) ON CONFLICT DO NOTHING",(uid,email,name,role,password_hash(secrets.token_urlsafe(24)),1,stamp))
     hid="demo-software-handover"
     if db.execute("SELECT 1 FROM kc_handovers WHERE id=?",(hid,)).fetchone():
         ensure_published_demo_handover(db)
@@ -673,7 +718,10 @@ async def kc_create_user(request: Request) -> dict[str, Any]:
     with connect() as db:
         uid="usr_"+uuid.uuid4().hex[:12]
         try: db.execute("INSERT INTO kc_users VALUES(?,?,?,?,?,?,?)",(uid,email,name,role,password_hash(password),1,now()))
-        except sqlite3.IntegrityError as exc: raise HTTPException(409,"An account with this email already exists") from exc
+        except Exception as exc:
+            if isinstance(exc,sqlite3.IntegrityError) or (psycopg is not None and isinstance(exc,psycopg.IntegrityError)):
+                raise HTTPException(409,"An account with this email already exists") from exc
+            raise
         return {"id":uid,"email":email,"display_name":name,"role":role,"temporary_password":"created; share it securely with the teammate"}
 
 
@@ -844,7 +892,7 @@ def kc_delete_source(handover_id: str, source_id: str, request: Request) -> dict
         db.execute("DELETE FROM kc_sources WHERE id=?",(source_id,))
         status=("Draft" if user["role"]=="employee" and h["status"] in ("Submitted","In review","Published") else ("In review" if user["role"]=="admin" and h["status"]=="Published" else h["status"]))
         db.execute("UPDATE kc_handovers SET status=?,updated_at=? WHERE id=?",(status,now(),handover_id))
-    if stored_name:
+    if stored_name and stored_name != "database":
         target=(UPLOADS/stored_name).resolve()
         if UPLOADS.resolve() in target.parents: target.unlink(missing_ok=True)
     return {"deleted":True,"invalidated_fields":invalidated,"status":status}
@@ -885,17 +933,12 @@ async def kc_upload_source(handover_id: str, request: Request) -> dict[str, Any]
         state=request.state
         async def json(self): return data
     result=await kc_add_source(handover_id,Payload())
-    stored_name=f"{result['id']}{suffix}"
-    target=(UPLOADS/stored_name).resolve()
-    if UPLOADS.resolve() not in target.parents:
-        raise HTTPException(400,"Invalid resource filename")
+    stored_name="database"
     try:
-        target.write_bytes(raw)
         with connect() as db:
-            db.execute("INSERT INTO kc_source_files(source_id,stored_name,original_name,content_type,size) VALUES(?,?,?,?,?)",(result["id"],stored_name,filename,part.get_content_type() or "application/octet-stream",len(raw)))
-    except (OSError, sqlite3.Error) as exc:
-        target.unlink(missing_ok=True)
-        raise HTTPException(507,"Could not save the original resource file") from exc
+            db.execute("INSERT INTO kc_source_files(source_id,stored_name,original_name,content_type,size,file_data) VALUES(?,?,?,?,?,?)",(result["id"],stored_name,filename,part.get_content_type() or "application/octet-stream",len(raw),raw))
+    except Exception as exc:
+        raise HTTPException(507,"Could not save the original resource file in the database") from exc
     result["download_url"]=f"/api/kc/sources/{result['id']}/file"
     return result
 
@@ -904,12 +947,14 @@ async def kc_upload_source(handover_id: str, request: Request) -> dict[str, Any]
 def kc_download_source(source_id: str, request: Request):
     user=require_roles(request,"admin","employee")
     with connect() as db:
-        row=db.execute("SELECT f.stored_name,f.original_name,f.content_type,s.handover_id FROM kc_source_files f JOIN kc_sources s ON s.id=f.source_id WHERE f.source_id=?",(source_id,)).fetchone()
+        row=db.execute("SELECT f.stored_name,f.original_name,f.content_type,f.file_data,s.handover_id FROM kc_source_files f JOIN kc_sources s ON s.id=f.source_id WHERE f.source_id=?",(source_id,)).fetchone()
         if not row: raise HTTPException(404,"Original resource file not found")
         require_handover_access(db,row["handover_id"],user,"employee")
+        if row["file_data"] is not None:
+            from urllib.parse import quote
+            return Response(content=bytes(row["file_data"]),media_type=row["content_type"],headers={"Content-Disposition":f"attachment; filename*=UTF-8''{quote(row['original_name'])}"})
         target=(UPLOADS/row["stored_name"]).resolve()
-        if UPLOADS.resolve() not in target.parents or not target.is_file():
-            raise HTTPException(404,"Original resource file is unavailable")
+        if UPLOADS.resolve() not in target.parents or not target.is_file(): raise HTTPException(404,"Original resource file is unavailable")
         return FileResponse(target,media_type=row["content_type"],filename=row["original_name"],content_disposition_type="attachment")
 
 
