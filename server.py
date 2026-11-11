@@ -44,6 +44,8 @@ class HybridRow(dict):
 
 
 def _hybrid_row_factory(cursor):
+    if cursor.description is None:
+        return lambda values: values
     names = [column.name for column in cursor.description]
     return lambda values: HybridRow(zip(names, values))
 
