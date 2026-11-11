@@ -1,0 +1,121 @@
+﻿# KNOWLEDGE CONTINUITY
+## A source-grounded handover for small startup teams
+### Round 1: The Plan | Solo Builder | 6 November 2026
+
+ONE-LINE CHALLENGE
+Prevent critical project knowledge from leaving when a team member leaves.
+
+THE PRODUCT
+Turn authorised project activity into a reviewed, role-appropriate continuation plan. Each important claim points to evidence; gaps and uncertainty remain visible until someone answers or approves them.
+
+01. UNDERSTANDING THE PROBLEM
+Small teams keep their work across chat threads, task boards, shared documents, code repositories and meeting notes. Those records may show what happened, but often do not explain why a decision was made, who owns unfinished work, what dependencies remain, or what the next person should do.
+
+This creates a specific problem when a short-tenure intern leaves a startup. The founder or project owner must piece the story back together, while the incoming intern waits, repeats discovery work or proceeds without enough context. The first use case for this product is helping small startup teams complete that transition with less reconstruction and fewer lost decisions.
+
+The product focuses on the handover itself: identifying useful project state from authorised sources, showing evidence and uncertainty, and giving an accountable person control over what gets shared.
+
+02. USERS AFFECTED
+Founder or project owner — reviewer: chooses the project and template, controls access, resolves uncertain claims, approves the handover and shares it.
+
+Departing intern — source provider: contributes permitted notes, documents or task exports and answers short questions while their context is still fresh.
+
+Incoming intern — recipient: receives the approved project state, responsibilities, open questions, risks and next actions they are allowed to see.
+
+03. PROPOSED SOLUTION
+Knowledge Continuity is a guided handover workspace. The owner selects and customises a template, adds authorised project material, and receives a draft organised around decisions, ownership, open work, blockers, dependencies, risks and next steps.
+
+The product attaches source references to proposed claims, marks each field Found, Inferred or Missing, and highlights conflicts. It asks a concise question when a key detail is missing. The owner can edit, reject or approve the result before sharing a role-appropriate view with the incoming person.
+
+The distinctive idea is gap detection plus guided questions. The system should be able to say what it cannot establish instead of filling gaps with plausible-sounding guesses.
+
+04. COMPLETE PRODUCT WORKFLOW
+1. Connect: The owner creates a project, selects a template and adds only sources they are authorised to use. The system records source identity and access level.
+2. Reconstruct: The system extracts relevant decisions, ownership, project status, blockers, dependencies, risks and next actions into template fields.
+3. Verify: Every proposed field is linked to numbered source chunks. Fields are marked Found, Inferred or Missing; contradictory evidence is flagged for review.
+4. Review: The system asks short questions about important missing fields. The owner can correct, reject or annotate suggestions and approve the final content.
+5. Handover: The owner creates a versioned, role-filtered view. The incoming person sees approved sections they are authorised to access and can acknowledge receipt.
+
+05. MAIN FEATURES
+• Five starting templates: Project Handover, Role Handover, Product or Feature, Research or Experiment, and Operations.
+• Owner-editable templates and fields.
+• Pasted text and PDF/DOCX upload. For the demo, one structured source such as a GitHub issues CSV export can also be supported; no live integration is required.
+• Structured extraction with references to numbered source chunks.
+• Field states: Found, Inferred and Missing, plus conflict flags.
+• Targeted questions for missing information.
+• Owner review, correction and approval.
+• Section-level permissions, version history and receipt acknowledgement.
+• Synthetic, public, permissioned or anonymised data for the demonstration.
+
+The first release is intentionally focused: one project, a few source formats, five editable templates and a complete approval-to-sharing path.
+
+06. TECHNOLOGY STACK
+Frontend — React: familiar components make it quick to build the template editor, source intake, review screen and role-specific views.
+
+Backend — FastAPI with Python: provides a lightweight API for document parsing, extraction steps and permission checks; Python has mature tools for document processing and AI workflows.
+
+Database — SQLite for the hackathon, with PostgreSQL as the deployment path: SQLite is quick to set up for a solo build; the data model can later move to a production database. Store projects, templates, fields, sources, chunks, citations, versions and access rules.
+
+AI layer — an LLM API with structured JSON output: the model proposes field values and evidence references in a predictable format. The application validates results and the owner controls publication.
+
+Parsing — PDF and DOCX libraries: convert uploads into text while preserving page or paragraph markers where possible, then split text into stable numbered chunks.
+
+Deployment — local or restricted demo environment: use synthetic data, keep API keys server-side and do not send unauthorised content to an AI provider.
+
+07. MAIN TECHNICAL CHALLENGE: TRUSTWORTHY EXTRACTION WITHOUT HALLUCINATION
+Every source is divided into numbered chunks with stable IDs. Each extracted value must cite one or more chunk IDs. Code checks that the IDs exist and that the cited text actually appears in the referenced source chunk; values that fail this check are rejected.
+
+A matching quote supports traceability, but does not by itself prove that a claim is true or current. Found means the source directly supports the field. Inferred means the system has suggested a conclusion that still needs owner confirmation. Missing means the available sources do not answer the question. Conflicting evidence is shown for review rather than silently resolved.
+
+The system asks a short question for each important Missing field. It never marks Inferred content as verified until the authorised owner approves it. This combines automation with human review and a clear evidence trail.
+
+08. PRIVACY, ACCESS AND HUMAN CONTROL
+Only ingest sources the project owner is authorised to use. Record the source owner and intended audience. Apply permissions to the handover fields or sections: permission to view a source does not automatically mean every derived claim should be shared.
+
+Use role-based access, redact sensitive details where practical, keep credentials on the server and avoid unnecessary source retention. Record edits, approvals, versions, sharing scope and acknowledgement so that corrections do not erase the history of an approved handover.
+
+Use synthetic or permissioned data in the demo. Derived text can reveal sensitive context even if a source excerpt is hidden, so review the permissions on the handover itself before sharing.
+
+09. SOLO BUILDER RESPONSIBILITIES
+I am building this as a solo project. I will own each workstream:
+
+• Product and research: define the first user scenario, template fields and success measures; validate assumptions with target users if access permits.
+• Design and frontend: build project setup, source intake, field-state review, approval and recipient screens.
+• Backend and data: implement project, template, source and version models, parsing, API endpoints and section-level access checks.
+• AI and trust: design the extraction schema, chunk citations, deterministic citation checks, uncertainty labels and conflict review.
+• Demo and documentation: prepare an anonymised sample handover, a clear walkthrough and an honest list of limitations.
+
+10. DEVELOPMENT PLAN ACROSS THREE ROUNDS
+Round 1 — The Plan: define the target user and transition, map the workflow, choose the stack and trust model, and prepare wireframes and a synthetic example. This proposal is the Round 1 deliverable.
+
+Round 2 — Working Core: build one project path: select a template, paste or upload sources, parse and chunk them, generate cited fields, validate references, flag gaps, collect answers, review and approve a handover.
+
+Round 3 — Three Promised Improvements and Polish:
+1. Add PDF/DOCX parsing if the working core began with pasted text.
+2. Add one structured import, such as a GitHub issues CSV export.
+3. Add recipient permissions, version history and acknowledgement.
+Then polish the demonstration and error handling. If time is limited, prioritise one complete source-to-approved-handover path. Keep live integrations, analytics and broad automation outside the MVP.
+
+11. EXPECTED IMPACT
+The incoming intern should find ownership, open work and next actions without searching every channel from scratch. Decisions and unresolved questions should remain attached to supporting sources. The founder should review a structured draft and resolve highlighted gaps instead of writing every section from memory.
+
+These are intended outcomes, not measured results. A small pilot could compare the time needed to produce a handover, count unanswered critical fields, check whether a recipient can identify the owner, blocker and next action, and record corrections or permission issues. The demo should show a recipient finding a clear next step in an approved, cited handover.
+
+12. VALIDATION PLAN AND FUTURE SCOPE
+Assumptions to test: Do founders spend meaningful time rebuilding context? Will departing interns answer targeted questions? Are section-level permissions understandable? Do citations help recipients trust a handover?
+
+A lightweight validation session could walk a founder and a recent intern through a synthetic example. Observe which fields they need, where they disagree and whether the next action is clear. This is planned validation, not completed research.
+
+After the event, future scope could include authorised live integrations with GitHub, Slack and Notion; more domain templates; stronger conflict and timeline views; analytics for handover completeness; acknowledgement reminders; and organisational controls such as retention policies and enterprise identity integration. These additions should follow evidence of user need and preserve explicit permission handling.
+
+13. TEAM AND PARTICIPANT DETAILS
+Team size: 1
+Builder: Aadit — Solo builder
+
+I am responsible for product planning, research, design, frontend and backend engineering, data handling, AI extraction, trust safeguards, validation and the final demonstration.
+
+14. WHY THIS IS FEASIBLE
+The first version concentrates on one transition workflow and does not depend on live third-party access. A solo builder can prioritise a working vertical slice: one project, a template, authorised source intake, evidence-backed fields, gap questions, owner approval and a controlled handover. Additional integrations and analytics remain future scope.
+
+15. CLOSING
+Knowledge Continuity turns scattered project activity into a role-appropriate handover that a new teammate can act on and inspect. The departing person can leave behind context while it is still fresh. The owner remains accountable for review and sharing. The incoming person gets decisions, open questions, risks and next actions linked to approved evidence—with uncertainty visible instead of hidden.

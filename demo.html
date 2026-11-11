@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Try the demo · Knowledge Continuity</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--wine:#7c0919;--ink:#242123;--muted:#797479;--line:#e9e6e4;--paper:#f8f7f5}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif}.page{max-width:1000px;margin:auto;padding:40px 26px}.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font:800 14px Manrope}.mark{width:31px;height:31px;display:grid;place-items:center;background:var(--wine);color:#fff}.hero{margin:72px 0 30px}.eyebrow{color:var(--wine);font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase}.hero h1{font:600 clamp(36px,6vw,62px)/1.04 Manrope;letter-spacing:-2.5px;max-width:790px;margin:14px 0}.hero p{font-size:15px;line-height:1.7;color:var(--muted);max-width:680px}.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.role{background:white;border:1px solid var(--line);padding:22px;min-height:190px;display:flex;flex-direction:column}.role small{font-size:9px;color:var(--wine);letter-spacing:1.2px;text-transform:uppercase;font-weight:700}.role h2{font:700 18px Manrope;margin:13px 0 7px}.role p{font-size:12px;line-height:1.6;color:var(--muted);margin:0 0 20px}.role button{margin-top:auto;text-align:left;border:0;border-top:1px solid var(--line);background:white;padding:13px 0 0;color:var(--wine);font-weight:700;font-size:11px;cursor:pointer}.note{margin-top:22px;padding:14px 16px;background:#f0e9e7;color:#655e61;font-size:10px;line-height:1.6}.error{color:#a0182a;font-size:12px;margin-top:12px;min-height:20px}@media(max-width:700px){.page{padding:24px 16px}.hero{margin-top:48px}.roles{grid-template-columns:1fr}.role{min-height:155px}}
+</style>
+</head>
+<body><main class="page">
+<a class="brand" href="/"><span class="mark">K</span> KNOWLEDGE CONTINUITY</a>
+<section class="hero"><div class="eyebrow">Interactive product demo</div><h1>See the handoff from each side.</h1><p>Choose a role to open the same fictional software project. No account or password is needed. Start as the reviewer to inspect the handoff, ask the intern for missing setup details, then publish it for the next engineer.</p></section>
+<section class="roles" aria-label="Choose a demo role">
+<article class="role"><small>01 / Review & approve</small><h2>Senior reviewer</h2><p>Inspect source-backed fields, review gaps, approve the handoff, and control what is shared.</p><button onclick="enter('admin')">Open reviewer workspace ↗</button></article>
+<article class="role"><small>02 / Add project context</small><h2>Intern / builder</h2><p>Add notes or project files, update the draft, and answer the senior's follow-up questions.</p><button onclick="enter('employee')">Open intern workspace ↗</button></article>
+<article class="role"><small>03 / Continue the work</small><h2>Incoming engineer</h2><p>Read approved sections, inspect dated evidence, acknowledge receipt, and ask sourced questions.</p><button onclick="enter('recipient')">Open engineer workspace ↗</button></article>
+</section>
+<div class="note"><b>Demo data only.</b> The Human Value Calculator project and its dated notes are fictional. This workspace is intended for judging and product exploration, not confidential information.</div><div class="error" id="error" role="status"></div>
+<p style="margin-top:20px;font-size:10px;color:#797479">Already part of a workspace? <a href="/login" style="color:#7c0919">Sign in</a></p>
+</main><script>
+async function enter(role){const error=document.getElementById('error');error.textContent='Opening the demo workspace...';try{const r=await fetch('/api/kc/demo/session',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({role})});const d=await r.json();if(!r.ok)throw Error(d.detail||'Demo access is not enabled on this deployment');location.href=d.next}catch(e){error.textContent=e.message}}
+</script></body></html>
