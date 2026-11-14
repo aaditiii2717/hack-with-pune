@@ -1,0 +1,245 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 4890 >>
+stream
+BT
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 748 Tm (ROUND 3 / FINAL PRODUCT) Tj
+0.09 0.13 0.23 rg
+/F2 23 Tf
+1 0 0 1 52 735 Tm (Knowledge Continuity) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 706 Tm (A reviewed, evidence-linked handover for software work that outlives its first builder.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 693 Tm (When an intern hands an unfinished feature to a senior engineer, critical context is scattered across notes, code,) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 680 Tm (exports, and conversations. Knowledge Continuity turns authorized sources into an editable, cited handover: a reviewer) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 667 Tm (checks it, controls what the next engineer sees, and publishes the continuation plan.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 654 Tm (Who uses it) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 632 Tm (Senior reviewer / owner ? Sets the template and assignments, reviews evidence, edits and approves fields, controls) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 619 Tm (visibility, and publishes a version.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 606 Tm (Intern / builder ? Adds authorized sources, checks extracted content, answers targeted questions, and submits the) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 593 Tm (handover. Cannot publish.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 580 Tm (Incoming engineer ? Reads the assigned published handover and approved visible fields, follows citations, asks questions,) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 567 Tm (and acknowledges receipt.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 554 Tm (Main journey) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 532 Tm (Assign work ? add project sources ? extract and verify passages ? complete the template and resolve gaps ? senior review) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 519 Tm (and field-level approval ? publish a version ? incoming engineer reads, asks, and acknowledges.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 506 Tm (The three Round 2 commitments) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 484 Tm (1 Better template ? delivered: The software handover starter now has 14 sections: user outcome and acceptance criteria;) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 471 Tm (scope; delivery status and proof; architecture and code map; reproducible setup; data/API contracts; logic and) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 458 Tm (assumptions; decisions and chronology; test evidence; known defects/security/privacy risks; dependencies and ownership;) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 445 Tm (prioritized next work; canonical references; and a first-day continuation plan. Owners copy and adapt the starter.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 432 Tm (2 Better hierarchy ? delivered: The app makes the senior reviewer/owner ? intern/builder ? incoming engineer) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 419 Tm (responsibilities explicit. Assignment, submission, approval, publication, and recipient access are enforced by the API,) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 406 Tm (including per-field recipient visibility.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 393 Tm (3 Production-ready system ? Round 3 hardening delivered: Hosted PostgreSQL support for serverless deployment; secure) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 380 Tm (session-cookie settings; server-side role and assignment checks; citation ID/quote validation; safe recipient filtering;) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 367 Tm (malformed JSON and invalid-template handling; concurrent first-owner setup protection; duplicate-publication rejection;) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 354 Tm (and end-to-end role-journey acceptance tests. Remaining operational work is disclosed below; this hackathon build has not) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 341 Tm (had an independent security audit.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 328 Tm (Completed capabilities) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 306 Tm (Distinct landing, reviewer, builder, and incoming-engineer experiences; synthetic Human Value Calculator demo.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 293 Tm (Default and owner-customized templates; assigned handovers; field editing, status, and focused missing-context questions.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 280 Tm (TXT, Markdown, CSV, JSON, LOG, web/code text formats, PDF, and DOCX intake \(10 MB per file\).) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 267 Tm (Stable source passage IDs, structured AI-assisted extraction when configured, citation checks, and local source-matching) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 254 Tm (fallback.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 241 Tm (Human approval, field-level visibility, versioned publication, recipient Q&A over approved sources, timeline, and) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 228 Tm (acknowledgement.) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 3939 >>
+stream
+BT
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 748 Tm (PostgreSQL persistence for source text and originals; SQLite local development.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 735 Tm (Architecture and implementation) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 713 Tm (Responsive HTML/CSS/browser JavaScript is served by a Python 3.12 FastAPI application. SQLite supports local use; Supabase) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 700 Tm (PostgreSQL via its transaction pooler persists hosted data. PDF and DOCX parsing use pypdf and python-docx. Groq or) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 687 Tm (OpenAI-compatible models can draft structured values; the server verifies cited passage IDs and exact quote text. Without) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 674 Tm (a provider key, local matching and evidence excerpts remain available. A human reviewer remains responsible for truth and) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 661 Tm (publication.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 648 Tm (Authorized source ? normalized text ? stable passages ? proposed field and citations ? server validation ? human) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 635 Tm (edit/approval ? role-filtered versioned handover.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 622 Tm (Verification) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 600 Tm (Local acceptance command: python -m unittest discover -s tests -v. The last run passed 2 tests. Coverage includes health) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 587 Tm (and landing, the 14-field starter, reviewer assignment, builder submission, recipient denial before publication, field) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 574 Tm (approval, publication, duplicate publish rejection, recipient filtering, Q&A, acknowledgement, unauthenticated access,) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 561 Tm (malformed JSON, and invalid empty templates. The test suite uses isolated temporary SQLite and synthetic data. The project) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 548 Tm (owner reports the Vercel runtime error is cleared; the live URL still needs a final private-window smoke check.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 535 Tm (Setup and submission links) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 513 Tm (Repository: https://github.com/aaditiii2717/hack-with-pune) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 500 Tm (Deployment reported by project owner: https://knowledge-continuity-4m1bfr7il-yaye2.vercel.app) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 487 Tm (Local: create a Python virtual environment, install requirements.txt, copy .env.example to .env, then run python -m) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 474 Tm (uvicorn server:app --host 127.0.0.1 --port 8000. Keep .env and database credentials out of Git. Hosted Vercel requires) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 461 Tm (DATABASE_URL \(Supabase transaction pooler\), KC_DEMO_MODE=1 for fictional judging data, and COOKIE_SECURE=1; an AI provider) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 448 Tm (key is optional.) Tj
+0.05 0.45 0.42 rg
+/F2 16 Tf
+1 0 0 1 52 435 Tm (Known limits and roadmap) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 413 Tm (The demo bypasses login and must contain synthetic data only. Account provisioning is owner-managed; there is no email) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 400 Tm (invite/password-reset service or automatic GitHub/Slack connector. Organization-level tenant isolation, independent) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 387 Tm (security audit, backup/restore drills, production monitoring, and formal retention controls remain future operational) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 374 Tm (work. The next development phase should prioritize secure invitations and account recovery, integration-backed source) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 361 Tm (sync, stronger organization and retention controls, and operational monitoring/restore validation.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
+endobj
+8 0 obj
+<< /Type /Catalog /Pages 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000005102 00000 n 
+0000005238 00000 n 
+0000009229 00000 n 
+0000009365 00000 n 
+0000009428 00000 n 
+trailer
+<< /Size 9 /Root 8 0 R >>
+startxref
+9477
+%%EOF

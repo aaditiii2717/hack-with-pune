@@ -36,6 +36,11 @@ app = FastAPI(title="Knowledge Continuity API", version="1.0.0")
 MODEL_LAST_ERROR = False
 
 
+@app.exception_handler(json.JSONDecodeError)
+async def malformed_json_handler(request: Request, exc: json.JSONDecodeError):
+    return JSONResponse({"detail":"Request body must be valid JSON"}, status_code=400)
+
+
 class HybridRow(dict):
     def __getitem__(self, key):
         if isinstance(key, int):
@@ -62,6 +67,16 @@ class PostgresConnection:
             if statement.strip(): self.execute(statement)
 
 
+class SQLiteConnection:
+    """Give sqlite connections the same close-on-exit behavior as Postgres connections."""
+    def __init__(self, raw): self.raw = raw
+    def __enter__(self): self.raw.__enter__(); return self
+    def __exit__(self, *args):
+        try: return self.raw.__exit__(*args)
+        finally: self.raw.close()
+    def __getattr__(self, name): return getattr(self.raw, name)
+
+
 def password_hash(password: str, salt: bytes | None = None) -> str:
     salt = salt or secrets.token_bytes(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 310_000)
@@ -84,11 +99,29 @@ def session_user(token: str | None) -> dict[str, Any] | None:
 
 @app.middleware("http")
 async def kc_auth_middleware(request: Request, call_next):
+    if request.url.path.startswith("/api/kc/") and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+        origin = request.headers.get("origin")
+        if origin:
+            expected = f"{request.url.scheme}://{request.url.netloc}"
+            forwarded_proto = request.headers.get("x-forwarded-proto", "").split(",", 1)[0].strip()
+            if forwarded_proto:
+                expected = f"{forwarded_proto}://{request.url.netloc}"
+            if origin.rstrip("/") != expected.rstrip("/"):
+                return JSONResponse({"detail":"Cross-origin request blocked"}, status_code=403)
     if request.url.path.startswith("/api/kc/") and request.url.path not in ("/api/kc/auth/status", "/api/kc/auth/setup", "/api/kc/auth/login", "/api/kc/capabilities", "/api/kc/demo/session"):
         user = session_user(request.cookies.get("kc_session"))
         if not user: return JSONResponse({"detail":"Please sign in to continue"},status_code=401)
         request.state.user = user
-    return await call_next(request)
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    if request.url.scheme == "https" or request.headers.get("x-forwarded-proto", "").split(",", 1)[0].strip() == "https":
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    if request.url.path.startswith("/api/kc/") or request.url.path in {"/login", "/app", "/employee", "/recipient", "/demo"}:
+        response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 def require_roles(request: Request, *roles: str) -> dict[str, Any]:
@@ -119,7 +152,7 @@ def connect():
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys=ON")
     db.execute("PRAGMA busy_timeout=5000")
-    return db
+    return SQLiteConnection(db)
 
 
 def init_db() -> None:
@@ -204,23 +237,29 @@ def ensure_software_handover_template(db: sqlite3.Connection) -> None:
     """Make the intern-to-engineer template available in both new and existing workspaces."""
     t = now()
     fields = [
-        ("problem_scope", "User problem & feature scope", "Who is this for, what problem does it address, and what is explicitly out of scope?", True),
-        ("implementation_state", "Implemented, partial, mocked, planned", "List each important feature as working, partial, mocked, or not built. Never describe a mock as production behavior.", True),
-        ("architecture", "Architecture & code map", "Explain the UI, API, data flow, main modules, and important file paths.", True),
-        ("local_setup", "Run the project locally", "Prerequisites and exact install, configuration, start, and test commands. Name required variables but never include secret values.", True),
-        ("calculations", "Core logic, formulas & assumptions", "For calculators or special features, explain inputs, formulas, units, assumptions, edge cases, and where the logic lives.", False),
-        ("data_integrations", "Data model, APIs & integrations", "Describe schemas, endpoints, external services, fixtures, and any fake or hard-coded data.", False),
-        ("decisions", "Technical decisions & rationale", "What choices were made, why, what alternatives were considered, and what constraints remain?", True),
-        ("tests", "Tests & verified behavior", "What was tested, expected versus actual results, how to reproduce, and what remains untested.", True),
-        ("known_gaps", "Known bugs, limitations & risks", "List reproducible issues, security/privacy concerns, technical debt, and behavior that must not be relied on.", True),
-        ("open_work", "Next tasks, owners & blockers", "Prioritized next actions with owner, acceptance criteria, dependencies, and current blocker.", True),
-        ("resources", "Repository, design & reference links", "Where the code, design files, issue list, conversations, and source-of-truth documents live.", True),
-        ("first_build", "Recommended first steps for the next engineer", "What should the senior or incoming engineer inspect, run, verify, and build first?", True),
+        ("user_outcome", "User need & acceptance criteria", "Who uses this feature, what job it does, expected behavior, success criteria, and explicit non-goals.", True),
+        ("feature_scope", "Feature scope & boundaries", "List included behavior, excluded behavior, supported platforms, and assumptions. Separate current scope from future ideas.", True),
+        ("implementation_state", "Delivery status & proof", "For each requirement mark Working, Partial, Mocked, Planned, or Unknown. Link proof such as a route, screenshot, commit, test, or demo. Never call a mock production behavior.", True),
+        ("architecture", "Architecture & code map", "Trace the user action through UI, API, business logic, data store, and integrations. Name entry points, key files, and ownership boundaries.", True),
+        ("local_setup", "Reproducible setup & configuration", "Prerequisites and exact install, configuration, start, and test commands. Name required variables and safe example values; never include secrets.", True),
+        ("data_integrations", "Data model, APIs & integrations", "Describe important tables and fields, endpoint/request-response contracts, external services, fixtures, and fake or hard-coded data.", True),
+        ("calculations", "Core logic, formulas & assumptions", "For calculations or special behavior, explain inputs, units, formula, rounding, edge cases, assumptions, and where the logic lives.", False),
+        ("decisions", "Decisions, trade-offs & chronology", "Record what changed, when, who decided, why, alternatives considered, and whether a decision has been superseded.", True),
+        ("tests", "Test evidence & verified behavior", "Give exact commands and environment, expected versus actual results, linked evidence, date checked, and what remains untested.", True),
+        ("known_gaps", "Known defects, security & privacy risks", "Give reproduction steps, user impact, severity, mitigation, technical debt, data sensitivity, and behavior that must not be relied on.", True),
+        ("dependencies", "Ownership, dependencies & escalation", "Name the accountable owner for each open dependency, what must happen first, external services/teams, and who to contact when blocked.", True),
+        ("open_work", "Prioritized next work", "Rank next tasks. For each include owner, acceptance criteria, dependency, estimate or urgency, and the first actionable step.", True),
+        ("resources", "Canonical repository & references", "Link the repository and branch/commit, issue tracker, design, API docs, conversations, and source-of-truth documents. Say which is authoritative.", True),
+        ("first_build", "Incoming engineer first-day plan", "Give an ordered first-hour/day plan: clone, configure, run, verify one happy path, inspect open risks, then choose the next task.", True),
     ]
-    db.execute(
-        "INSERT INTO kc_templates VALUES(?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING",
-        ("software-project", "Software project handover", "Help a senior engineer review an intern-built feature and hand a clear, safe continuation plan to the next developer.", "Engineering", 1, json.dumps([{"key":k,"label":label,"help":help_text,"required":required} for k,label,help_text,required in fields]), t, t),
-    )
+    payload = json.dumps([{"key":k,"label":label,"help":help_text,"required":required} for k,label,help_text,required in fields])
+    existing = db.execute("SELECT fields_json FROM kc_templates WHERE id='software-project'").fetchone()
+    if not existing:
+        db.execute("INSERT INTO kc_templates VALUES(?,?,?,?,?,?,?,?)", ("software-project", "Software feature handover", "A senior-led engineering handoff for an intern-built feature: verified behavior, operating instructions, risks, ownership, and the next build.", "Engineering", 1, payload, t, t))
+    elif json.loads(existing["fields_json"]) != json.loads(payload):
+        # Starter templates are protected from direct editing in the UI. Owners customize a copy,
+        # so it is safe to improve this canonical template without overwriting their work.
+        db.execute("UPDATE kc_templates SET name=?,description=?,category=?,fields_json=?,updated_at=? WHERE id='software-project'", ("Software feature handover", "A senior-led engineering handoff for an intern-built feature: verified behavior, operating instructions, risks, ownership, and the next build.", "Engineering", payload, t))
 
 
 def ensure_demo_workspace(db: sqlite3.Connection) -> None:
@@ -649,10 +688,13 @@ def kc_capabilities() -> dict[str, Any]:
     return {"model_configured": bool(key), "model_state":"fallback after provider error" if MODEL_LAST_ERROR else ("configured" if key else "source-only"), "model": model, "uploads": ["txt", "md", "csv", "json", "log", "html", "css", "js", "jsx", "ts", "tsx", "py", "sql", "yaml", "yml", "pdf", "docx"], "max_upload_bytes": 10 * 1024 * 1024}
 
 
-def start_session(db: sqlite3.Connection, response, user_id: str) -> None:
+def start_session(db: sqlite3.Connection, response, user_id: str, request: Request | None = None) -> None:
     token=secrets.token_urlsafe(36); t=datetime.now(timezone.utc)
+    db.execute("DELETE FROM kc_sessions WHERE expires_at<?", (t.isoformat(timespec="seconds"),))
     db.execute("INSERT INTO kc_sessions VALUES(?,?,?,?)",(hashlib.sha256(token.encode()).hexdigest(),user_id,(t+timedelta(hours=12)).isoformat(timespec="seconds"),t.isoformat(timespec="seconds")))
-    response.set_cookie("kc_session",token,max_age=12*60*60,httponly=True,samesite="lax",secure=os.environ.get("COOKIE_SECURE","0").lower() in ("1","true","yes"),path="/")
+    forwarded_proto = request.headers.get("x-forwarded-proto", "").split(",", 1)[0].strip().lower() if request else ""
+    secure = os.environ.get("COOKIE_SECURE", "0").lower() in ("1", "true", "yes") or bool(request and request.url.scheme == "https") or forwarded_proto == "https"
+    response.set_cookie("kc_session",token,max_age=12*60*60,httponly=True,samesite="lax",secure=secure,path="/")
 
 
 @app.get("/api/kc/auth/status")
@@ -667,9 +709,10 @@ async def kc_auth_setup(request: Request):
     data=await request.json(); email=str(data.get("email","")).strip().lower(); name=str(data.get("name","")).strip(); password=str(data.get("password",""))
     if not email or "@" not in email or not name or len(password)<12: raise HTTPException(422,"Enter your name, a valid email, and a password of at least 12 characters")
     with connect() as db:
+        if USE_POSTGRES: db.execute("SELECT pg_advisory_xact_lock(731905215)")
         if db.execute("SELECT COUNT(*) FROM kc_users").fetchone()[0]: raise HTTPException(409,"Workspace setup has already been completed")
         uid="usr_"+uuid.uuid4().hex[:12]; db.execute("INSERT INTO kc_users VALUES(?,?,?,?,?,?,?)",(uid,email,name,"admin",password_hash(password),1,now()))
-        response=JSONResponse({"user":{"id":uid,"email":email,"display_name":name,"role":"admin"}}); start_session(db,response,uid); return response
+        response=JSONResponse({"user":{"id":uid,"email":email,"display_name":name,"role":"admin"}}); start_session(db,response,uid,request); return response
 
 
 @app.post("/api/kc/auth/login")
@@ -678,7 +721,7 @@ async def kc_auth_login(request: Request):
     with connect() as db:
         user=db.execute("SELECT * FROM kc_users WHERE email=? AND active=1",(email,)).fetchone()
         if not user or not password_matches(password,user["password_hash"]): raise HTTPException(401,"Email or password is incorrect")
-        response=JSONResponse({"user":{"id":user["id"],"email":user["email"],"display_name":user["display_name"],"role":user["role"]}}); start_session(db,response,user["id"]); return response
+        response=JSONResponse({"user":{"id":user["id"],"email":user["email"],"display_name":user["display_name"],"role":user["role"]}}); start_session(db,response,user["id"],request); return response
 
 
 @app.post("/api/kc/demo/session")
@@ -691,7 +734,7 @@ async def kc_demo_session(request: Request):
         user=db.execute("SELECT id,email,display_name,role FROM kc_users WHERE id=? AND active=1",(user_id,)).fetchone()
         if not user: raise HTTPException(503,"Demo workspace is not initialized")
         response=JSONResponse({"next":"/app" if role=="admin" else "/employee" if role=="employee" else "/recipient"})
-        start_session(db,response,user_id)
+        start_session(db,response,user_id,request)
         return response
 
 
@@ -733,19 +776,26 @@ def kc_templates() -> list[dict[str, Any]]:
         return [{**dict(r), "fields": json.loads(r["fields_json"])} for r in db.execute("SELECT * FROM kc_templates ORDER BY is_default DESC,name")]
 
 
+def clean_template_fields(fields: Any) -> list[dict[str, Any]]:
+    if not isinstance(fields, list) or not fields or len(fields) > 40:
+        raise HTTPException(422, "A template must contain between 1 and 40 fields")
+    clean=[]
+    for field in fields:
+        if not isinstance(field,dict) or not str(field.get("label","")).strip():
+            raise HTTPException(422,"Every template field needs a name")
+        key=re.sub(r"[^a-z0-9_]+","_",str(field.get("key") or field["label"]).lower()).strip("_")[:60]
+        if not key or key in {item["key"] for item in clean}:
+            raise HTTPException(422,"Template field names must be unique")
+        clean.append({"key":key,"label":str(field["label"]).strip()[:120],"help":str(field.get("help","")).strip()[:500],"required":bool(field.get("required",False))})
+    return clean
+
+
 @app.post("/api/kc/templates")
 async def kc_create_template(request: Request) -> dict[str, Any]:
     require_roles(request,"admin")
     data = await request.json(); name = str(data.get("name", "")).strip(); fields = data.get("fields")
-    if not name or not isinstance(fields, list) or not fields:
-        raise HTTPException(422, "Template name and at least one field are required")
-    clean=[]
-    for f in fields:
-        if not isinstance(f,dict) or not str(f.get("label","")).strip(): continue
-        key=re.sub(r"[^a-z0-9_]+","_",str(f.get("key") or f["label"]).lower()).strip("_")[:60]
-        if not key or key in {x["key"] for x in clean}: raise HTTPException(422,"Template field names must be unique")
-        clean.append({"key":key,"label":str(f["label"]).strip()[:120],"help":str(f.get("help","" )).strip()[:500],"required":bool(f.get("required",False))})
-    if not clean: raise HTTPException(422,"Template must contain a named field")
+    if not name or len(name)>120: raise HTTPException(422,"Template name must be between 1 and 120 characters")
+    clean=clean_template_fields(fields)
     with connect() as db:
         tid="tpl_"+uuid.uuid4().hex[:12]; t=now()
         db.execute("INSERT INTO kc_templates VALUES(?,?,?,?,?,?,?,?)",(tid,name,str(data.get("description",""))[:500],str(data.get("category","Custom"))[:80],0,json.dumps(clean),t,t))
@@ -761,12 +811,8 @@ async def kc_update_template(template_id: str, request: Request) -> dict[str, An
         if not old: raise HTTPException(404,"Template not found")
         if old["is_default"]: raise HTTPException(409,"Save a copy of a default template before editing it")
         name=str(data.get("name",old["name"])).strip(); fields=data.get("fields",json.loads(old["fields_json"]))
-        clean=[]
-        for f in fields:
-            if not isinstance(f,dict) or not str(f.get("label","")).strip(): continue
-            key=re.sub(r"[^a-z0-9_]+","_",str(f.get("key") or f["label"]).lower()).strip("_")[:60]
-            if not key or key in {x["key"] for x in clean}: raise HTTPException(422,"Template field names must be unique")
-            clean.append({"key":key,"label":str(f["label"]).strip()[:120],"help":str(f.get("help",""))[:500],"required":bool(f.get("required",False))})
+        if not name or len(name)>120: raise HTTPException(422,"Template name must be between 1 and 120 characters")
+        clean=clean_template_fields(fields)
         db.execute("UPDATE kc_templates SET name=?,description=?,category=?,fields_json=?,updated_at=? WHERE id=?",(name,str(data.get("description",old["description"])),str(data.get("category",old["category"])),json.dumps(clean),now(),template_id))
         r=db.execute("SELECT * FROM kc_templates WHERE id=?",(template_id,)).fetchone()
         return {**dict(r),"fields":json.loads(r["fields_json"])}
