@@ -10,6 +10,8 @@ import urllib.error
 import hashlib
 import hmac
 import secrets
+import zipfile
+import io
 from datetime import datetime, timezone, timedelta, date
 from pathlib import Path
 from typing import Any
@@ -274,6 +276,8 @@ def ensure_demo_workspace(db: sqlite3.Connection) -> None:
         db.execute("INSERT INTO kc_users VALUES(?,?,?,?,?,?,?) ON CONFLICT DO NOTHING",(uid,email,name,role,password_hash(secrets.token_urlsafe(24)),1,stamp))
     hid="demo-software-handover"
     if db.execute("SELECT 1 FROM kc_handovers WHERE id=?",(hid,)).fetchone():
+        ensure_demo_sources(db,hid)
+        ensure_demo_fields(db,hid)
         ensure_published_demo_handover(db)
         return
     template=db.execute("SELECT * FROM kc_templates WHERE id='software-project'").fetchone()
@@ -316,35 +320,188 @@ def ensure_demo_workspace(db: sqlite3.Connection) -> None:
     missing_field=db.execute("SELECT id FROM kc_fields WHERE handover_id=? AND key='local_setup'",(hid,)).fetchone()
     if missing_field:
         db.execute("INSERT INTO kc_questions VALUES(?,?,?,?,?,?,?,?,?)",("demo-question-setup",hid,missing_field["id"],"What exact commands, required environment variables, and repository path should the next engineer use?","","","Open",stamp,None))
+    ensure_demo_sources(db,hid)
+    ensure_demo_fields(db,hid)
     ensure_published_demo_handover(db)
+
+
+def demo_source_specs() -> list[tuple[str, str, str, str]]:
+    """Synthetic multi-source project trail for a judge to inspect and query."""
+    return [
+        ("demo-source-readme", "Synthetic README.md", "md", """SYNTHETIC SAMPLE — Human Value Calculator. All names, dates, repository references, and project history below are fictional.
+
+Purpose: a small-team prototype estimates the weekly labor value of one workflow improvement. It is an estimate, not audited ROI, a customer promise, or a validated business metric.
+
+Feature scope: one user enters weekly hours saved and an hourly value. The screen displays a weekly estimate. Multi-week forecasts, saved accounts, customer billing, and production analytics are out of scope.
+
+Current implementation: the calculator form and estimate display work with sample/local inputs. The estimate is not saved to a database. No customer data or production credentials are included. Deployment status and last deployed commit are not recorded in the supplied project sources.
+
+Architecture (fictional project map): `src/calculator/estimate.ts` holds the browser calculation; `src/calculator/EstimateForm.tsx` owns input state; `api/estimate.py` is a local-only experimental endpoint. The form currently calculates in the browser; the API route is not connected to the screen. No database integration is implemented.
+
+Local setup (fictional project): Node.js 20; run `npm install`, then `npm run dev`. For the isolated API experiment, create a Python 3.12 environment, run `python -m pip install -r requirements.txt`, then `python -m uvicorn api.estimate:app --reload`. These commands have not been verified in this demo environment. No secret values belong in a handover; ask the owner for access through the approved secret manager.
+
+Data and privacy: inputs are held in browser memory only. Do not enter personal, payroll, customer, or confidential data. The demo uses invented numbers and has no external integrations.
+
+Decision recorded 2026-11-09: keep the first build to a weekly estimate so the team can validate the user need before adding persistence or forecasting. The owner must approve any change to this scope.
+
+Known gaps: automated tests are absent; input validation and accessibility are incomplete; rounding behavior conflicts across sources; zero/negative inputs are not specified; the API route is unused; no database or production deployment is evidenced. Treat all of these as open work, not completed features.
+
+Next build order: inspect the form and estimate function; agree rounding and invalid-input behavior with the reviewer; add unit tests; connect the API only after a reviewed contract; do not add persistence until privacy and retention are decided.
+
+Synthetic repository reference: `https://example.invalid/human-value-calculator` (reserved example domain; not a real repository)."""),
+        ("demo-source-whatsapp", "Synthetic WhatsApp export.txt", "txt", """SYNTHETIC CHAT EXPORT — fictional participants; no real phone numbers or customer messages.
+
+2026-11-10 10:12 — Intern: The calculator returns weekly hours saved multiplied by hourly value. I used 2 decimals in the screen, but an earlier sketch says round to a whole number. I could not find an owner decision.
+
+2026-11-10 10:18 — Senior reviewer: Keep the conflict visible. Do not choose a rounding rule silently. Ask me before changing the display or calling the number ROI.
+
+2026-11-10 10:24 — Intern: I checked zero hours and a normal positive example manually. Negative hours and blank input still need validation. I did not write automated tests.
+
+2026-11-11 15:40 — Intern: The screen is local-only. The API experiment is not wired to it, and no database or customer data is connected.
+
+2026-11-11 15:46 — Senior reviewer: Before the next engineer releases anything, confirm the exact deployment/tag with me; the exported project notes do not identify a verified staging release."""),
+        ("demo-source-email", "Synthetic Gmail departure thread.txt", "txt", """SYNTHETIC EMAIL EXPORT — illustrative Gmail-style thread only. No real mailbox was connected and no email was sent.
+
+From: Demo Intern
+To: Demo Senior Reviewer
+Date: 2026-11-12
+Subject: Human Value Calculator — before I hand it over
+
+I added the local setup commands and code map to the README. Please confirm whether the UI should show two decimals or round to a whole number; my sources disagree. I tested one zero input and one positive input by hand, but did not test negative or blank values. There is no saved-data flow yet. I have not captured a verified deployment URL or commit, so please confirm that with the team before calling a build released.
+
+I did not include any API keys, passwords, customer records, or real contact details. If the next engineer needs service access, please share it through the team's secret manager, not email or this handover.
+
+Reviewer reply (synthetic): Thanks. Keep rounding marked unresolved until product approves it. Add validation and automated tests before connecting persistent data. The release tag is still unverified; ask the release owner. Never copy secret values into a handover."""),
+        ("demo-source-issues", "Synthetic issue export.csv", "csv", """id,title,status,owner,priority,acceptance_criteria,dependency
+HVC-14,Decide estimate rounding,Open,Senior reviewer,High,Product owner records one rounding rule and updates UI plus tests,Product decision
+HVC-15,Validate blank and negative inputs,Todo,Incoming engineer,High,Blank and negative values show clear inline errors; valid zero remains supported,None
+HVC-16,Add automated calculation tests,Todo,Incoming engineer,High,Tests cover zero positive negative blank and chosen rounding,Agree rounding rule
+HVC-17,Verify local setup and API contract,Todo,Incoming engineer,Medium,Fresh clone follows README and unused API route is either integrated or removed,Access to repository
+HVC-18,Confirm verified release identifier,Blocked,Senior reviewer,High,Reviewer confirms deployment URL and commit/tag from release owner,Release owner confirmation
+HVC-19,Decide whether results may be persisted,Open,Product owner,Medium,Document user need consent retention and deletion before adding a database,Privacy review"""),
+        ("demo-source-tests", "Synthetic test-run.log", "log", """SYNTHETIC MANUAL CHECK LOG — not output from an automated CI run.
+
+Run date: 2026-11-10. Environment: local prototype, sample inputs only.
+
+Case: weekly hours saved = 2; hourly value = 500. Expected arithmetic before display rounding: 1000. Observed: 1000.00.
+
+Case: weekly hours saved = 0; hourly value = 500. Expected arithmetic: 0. Observed: 0.00.
+
+Not tested: blank input, negative values, decimal precision, keyboard-only use, screen-reader behavior, API endpoint, database persistence, deployment, load, or real customer data.
+
+Result: 2 manual examples passed; this is not evidence of automated tests or production readiness."""),
+        ("demo-source-faq", "Synthetic handover Q&A.md", "md", """SYNTHETIC DEMO ANSWERS — answers are limited to the supplied fictional sources.
+
+Q: What does the feature do? A: It estimates weekly labor value from weekly hours saved multiplied by an hourly value.
+
+Q: Is the estimate validated ROI? A: No. The README calls it an unvalidated estimate, not audited ROI or a customer promise.
+
+Q: Where does the calculation happen? A: The fictional code map says `src/calculator/estimate.ts`; the form currently calculates in the browser. The experimental API is not connected.
+
+Q: Is data saved? A: No. Inputs stay in browser memory; no database persistence is implemented.
+
+Q: What is complete? A: The calculator form and estimate display work with sample/local inputs. Automated tests, complete validation, API integration, and production deployment are not evidenced.
+
+Q: What was tested? A: Two manual examples only: 2 hours at 500 gives 1000 before rounding; zero hours gives zero. No automated test run is documented.
+
+Q: What rounding rule is approved? A: The README and chat conflict. The reviewer explicitly says not to choose silently; a product decision is still required.
+
+Q: What should the next engineer do first? A: Verify a fresh local setup, ask the reviewer about rounding, then add blank/negative input validation and automated tests.
+
+Q: Is there a verified staging release? A: No supplied source names a verified deployment or commit. Confirm with the release owner before calling any build released.
+
+Q: Where are credentials? A: No credentials are in the sample. Ask the owner for access through the approved secret manager; never put secrets in the handover.
+
+Q: Can the estimate be used with customer or payroll data? A: No. The sample explicitly says not to enter personal, payroll, customer, or confidential data.
+
+Q: Why is there no persistence? A: The team deferred it until the user need, consent, retention, and deletion behavior receive a privacy review."""),
+    ]
+
+
+def ensure_demo_sources(db: sqlite3.Connection, handover_id: str) -> None:
+    """Add synthetic source files idempotently, including when an existing demo DB upgrades."""
+    stamp=now()
+    for sid,name,source_type,content in demo_source_specs():
+        if db.execute("SELECT 1 FROM kc_sources WHERE id=?",(sid,)).fetchone():
+            continue
+        db.execute("INSERT INTO kc_sources VALUES(?,?,?,?,?,?,?,?)",(sid,handover_id,name,source_type,content,"Synthetic demo data","Demo handover only",stamp))
+        for ix,part in enumerate(make_passages(content),1):
+            db.execute("INSERT INTO kc_passages VALUES(?,?,?,?)",(f"{sid}-p{ix:03d}",sid,ix,part))
+
+
+def ensure_demo_fields(db: sqlite3.Connection, handover_id: str) -> None:
+    """Fill only missing demo fields from explicit synthetic evidence; preserve reviewer edits."""
+    evidence={
+        "user_outcome":("demo-source-readme","Purpose: a small-team prototype estimates the weekly labor value of one workflow improvement.","A fictional prototype estimates weekly labor value for one workflow improvement; it is not validated ROI."),
+        "feature_scope":("demo-source-readme","Feature scope: one user enters weekly hours saved and an hourly value.","One user enters hours saved per week and hourly value; multi-week forecasts, accounts, billing, and production analytics are out of scope."),
+        "implementation_state":("demo-source-readme","Current implementation: the calculator form and estimate display work with sample/local inputs.","The form and estimate display work on sample/local inputs. No automated tests, API integration, database persistence, or verified production release is evidenced."),
+        "architecture":("demo-source-readme","Architecture (fictional project map): `src/calculator/estimate.ts` holds the browser calculation;", "The fictional code map places the calculation in `src/calculator/estimate.ts`; the form calculates in-browser. The experimental API is not connected."),
+        "local_setup":("demo-source-readme","Local setup (fictional project): Node.js 20; run `npm install`, then `npm run dev`.","Fictional local setup: Node.js 20, `npm install`, `npm run dev`; optional API experiment uses Python 3.12, installs `requirements.txt`, then runs `python -m uvicorn api.estimate:app --reload`. Commands remain unverified."),
+        "data_integrations":("demo-source-readme","Data and privacy: inputs are held in browser memory only.","Inputs remain in browser memory; there is no database or external integration, and the demo must not receive customer or payroll data."),
+        "calculations":("demo-source-faq","Q: What does the feature do? A: It estimates weekly labor value", "Weekly estimate = hours saved per week × hourly value. The sources conflict on display rounding; do not label it validated ROI."),
+        "decisions":("demo-source-whatsapp","2026-11-10 10:18 — Senior reviewer: Keep the conflict visible.","The senior reviewer decided not to silently choose a rounding rule or call the estimate ROI; product approval is still needed."),
+        "tests":("demo-source-tests","Result: 2 manual examples passed; this is not evidence of automated tests", "Two manual arithmetic examples passed; automated, accessibility, API, persistence, deployment, and load tests are not documented."),
+        "known_gaps":("demo-source-readme","Known gaps: automated tests are absent; input validation and accessibility are incomplete;", "Automated tests and accessibility review are absent; blank/negative input handling, rounding, API integration, persistence, and release identity remain unresolved."),
+        "dependencies":("demo-source-issues","HVC-18,Confirm verified release identifier,Blocked,Senior reviewer,High,Reviewer confirms deployment URL and commit/tag from release owner,Release owner confirmation", "The release identifier depends on confirmation from the release owner; persistence also requires a privacy review."),
+        "open_work":("demo-source-issues","HVC-15,Validate blank and negative inputs,Todo,Incoming engineer,High,Blank and negative values show clear inline errors; valid zero remains supported,None", "Prioritize rounding decision, input validation, automated tests, setup verification, then confirm the release identifier before claiming deployment."),
+        "resources":("demo-source-readme","Synthetic repository reference: `https://example.invalid/human-value-calculator`", "Synthetic repository reference: https://example.invalid/human-value-calculator (reserved example domain, not a real repository). README, WhatsApp-style export, Gmail-style departure thread, issue CSV, manual test log, and FAQ are all synthetic."),
+        "first_build":("demo-source-email","I added the local setup commands and code map to the README.","First verify the setup from a fresh clone; ask the reviewer to resolve rounding; add blank/negative validation and automated tests; do not connect persistence until privacy decisions are approved."),
+    }
+    for key,(source_id,needle,value) in evidence.items():
+        field=db.execute("SELECT * FROM kc_fields WHERE handover_id=? AND key=?",(handover_id,key)).fetchone()
+        if not field or (field["state"]!="Missing" and field["value"].strip()):
+            continue
+        passage=db.execute("SELECT id,text FROM kc_passages WHERE source_id=? AND instr(text,?)>0 ORDER BY ordinal LIMIT 1",(source_id,needle)).fetchone()
+        if not passage: continue
+        cite=[{"passage_id":passage["id"],"quote":passage["text"]}]
+        note="Source statements disagree; owner must decide before treating the display rule as settled." if key=="calculations" else ""
+        db.execute("UPDATE kc_fields SET value=?,state='Found',citations_json=?,owner_note=?,visible_to_recipient=1,approved=0,updated_at=? WHERE id=?",(value,json.dumps(cite),note,now(),field["id"]))
+        db.execute("UPDATE kc_questions SET status='Resolved',answer='Updated from the synthetic source pack; reviewer should verify before sharing.',answered_by='Synthetic demo data',answered_at=? WHERE field_id=? AND status='Open'",(now(),field["id"]))
+    gaps=db.execute("SELECT id FROM kc_fields WHERE handover_id=? AND key='known_gaps'",(handover_id,)).fetchone()
+    if gaps and not db.execute("SELECT 1 FROM kc_questions WHERE id='demo-question-release' AND handover_id=?",(handover_id,)).fetchone():
+        db.execute("INSERT INTO kc_questions VALUES(?,?,?,?,?,?,?,?,?)",("demo-question-release",handover_id,gaps["id"],"Which deployment URL and commit/tag did the release owner last verify? The supplied project sources do not record one.","","","Open",now(),None))
 
 
 def ensure_published_demo_handover(db: sqlite3.Connection) -> None:
     """Provide the recipient role a separate, already-reviewed synthetic handoff."""
     source_hid="demo-software-handover"; target_hid="demo-published-handover"
-    if db.execute("SELECT 1 FROM kc_handovers WHERE id=?",(target_hid,)).fetchone(): return
     original=db.execute("SELECT * FROM kc_handovers WHERE id=?",(source_hid,)).fetchone()
-    source=db.execute("SELECT * FROM kc_sources WHERE handover_id=? ORDER BY created_at LIMIT 1",(source_hid,)).fetchone()
-    if not original or not source: return
+    if not original: return
     stamp=now()
-    db.execute("INSERT INTO kc_handovers(id,title,template_id,departing_person,recipient,owner,status,created_at,updated_at,published_at) VALUES(?,?,?,?,?,?,?,?,?,?)",(target_hid,"Human Value Calculator - reviewed handoff",original["template_id"],original["departing_person"],original["recipient"],original["owner"],"Published",original["created_at"],stamp,stamp))
-    db.execute("INSERT INTO kc_handover_access VALUES(?,?,?)",(target_hid,"demo_admin","admin"))
-    db.execute("INSERT INTO kc_handover_access VALUES(?,?,?)",(target_hid,"demo_engineer","recipient"))
-    target_source="demo-published-source"
-    db.execute("INSERT INTO kc_sources VALUES(?,?,?,?,?,?,?,?)",(target_source,target_hid,"Synthetic project notes.md",source["source_type"],source["content"],source["added_by"],source["audience"],source["created_at"]))
+    created=not db.execute("SELECT 1 FROM kc_handovers WHERE id=?",(target_hid,)).fetchone()
+    if created:
+        db.execute("INSERT INTO kc_handovers(id,title,template_id,departing_person,recipient,owner,status,created_at,updated_at,published_at) VALUES(?,?,?,?,?,?,?,?,?,?)",(target_hid,"Human Value Calculator - reviewed handoff",original["template_id"],original["departing_person"],original["recipient"],original["owner"],"Published",original["created_at"],stamp,stamp))
+        db.execute("INSERT INTO kc_handover_access VALUES(?,?,?)",(target_hid,"demo_admin","admin"))
+        db.execute("INSERT INTO kc_handover_access VALUES(?,?,?)",(target_hid,"demo_engineer","recipient"))
+    changed=created
     passage_map={}
-    for ix,row in enumerate(db.execute("SELECT * FROM kc_passages WHERE source_id=? ORDER BY ordinal",(source["id"],)).fetchall()):
-        new_id=f"demo-published-passage-{ix+1}"; passage_map[row["id"]]=new_id
-        db.execute("INSERT INTO kc_passages VALUES(?,?,?,?)",(new_id,target_source,ix,row["text"]))
+    for source in db.execute("SELECT * FROM kc_sources WHERE handover_id=? ORDER BY created_at,id",(source_hid,)).fetchall():
+        target_source="demo-pub-"+source["id"]
+        if not db.execute("SELECT 1 FROM kc_sources WHERE id=?",(target_source,)).fetchone():
+            db.execute("INSERT INTO kc_sources VALUES(?,?,?,?,?,?,?,?)",(target_source,target_hid,source["name"],source["source_type"],source["content"],source["added_by"],source["audience"],source["created_at"]))
+            changed=True
+            for row in db.execute("SELECT * FROM kc_passages WHERE source_id=? ORDER BY ordinal",(source["id"],)).fetchall():
+                new_id=target_source+"-p"+str(row["ordinal"]).zfill(3); passage_map[row["id"]]=new_id
+                db.execute("INSERT INTO kc_passages VALUES(?,?,?,?)",(new_id,target_source,row["ordinal"],row["text"]))
+        else:
+            for row in db.execute("SELECT * FROM kc_passages WHERE source_id=? ORDER BY ordinal",(source["id"],)).fetchall():
+                passage_map[row["id"]]=target_source+"-p"+str(row["ordinal"]).zfill(3)
     for field in db.execute("SELECT * FROM kc_fields WHERE handover_id=? ORDER BY position",(source_hid,)).fetchall():
-        fid=f"demo-published-field-{field['key']}"
+        fid="demo-published-field-"+field["key"]
+        existing=db.execute("SELECT * FROM kc_fields WHERE id=?",(fid,)).fetchone()
         citations=json.loads(field["citations_json"])
         for cite in citations: cite["passage_id"]=passage_map.get(cite["passage_id"],cite["passage_id"])
-        shareable=field["state"] in ("Found","Inferred","Manual")
-        visible=1 if shareable else 0
-        db.execute("INSERT INTO kc_fields VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",(fid,target_hid,field["key"],field["label"],field["value"],field["state"],json.dumps(citations),"",visible,1 if shareable else 0,field["position"],stamp))
-    snapshot=kc_detail(db,target_hid,recipient=True)
-    db.execute("INSERT INTO kc_versions(handover_id,version_number,snapshot_json,created_at,note) VALUES(?,?,?,?,?)",(target_hid,1,json.dumps(snapshot,ensure_ascii=False),stamp,"Synthetic reviewer-approved example"))
+        shareable=field["state"] in ("Found","Inferred","Manual") and bool(field["value"].strip())
+        if not existing:
+            db.execute("INSERT INTO kc_fields VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",(fid,target_hid,field["key"],field["label"],field["value"] if shareable else "",field["state"] if shareable else "Missing",json.dumps(citations if shareable else []),"",1 if shareable else 0,1 if shareable else 0,field["position"],stamp))
+            changed=True
+        elif existing["state"]=="Missing" and shareable:
+            db.execute("UPDATE kc_fields SET value=?,state=?,citations_json=?,visible_to_recipient=1,approved=1,updated_at=? WHERE id=?",(field["value"],field["state"],json.dumps(citations),stamp,fid)); changed=True
+    if changed:
+        latest=db.execute("SELECT COALESCE(MAX(version_number),0) n FROM kc_versions WHERE handover_id=?",(target_hid,)).fetchone()["n"]
+        snapshot=kc_detail(db,target_hid,recipient=True)
+        db.execute("INSERT INTO kc_versions(handover_id,version_number,snapshot_json,created_at,note) VALUES(?,?,?,?,?)",(target_hid,latest+1,json.dumps(snapshot,ensure_ascii=False),stamp,"Synthetic reviewer-approved example"))
+        db.execute("UPDATE kc_handovers SET published_at=?,updated_at=? WHERE id=?",(stamp,stamp,target_hid))
 
 
 def seed_kc_users(db: sqlite3.Connection) -> None:
@@ -582,6 +739,40 @@ def make_passages(text: str, limit: int = 950) -> list[str]:
         if para:
             chunks.append(para)
     return chunks
+
+
+def validate_source_text(text: str) -> None:
+    """Reject obvious credential dumps and malware test strings before indexing or model use."""
+    if "\x00" in text:
+        raise HTTPException(422, "Resource contains binary data, not readable text")
+    if re.search(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----", text, re.I):
+        raise HTTPException(422, "Private key material is not allowed in handover resources")
+    if re.search(r"(?i)\b(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]\s*[\"']?[^\s\"']{12,}", text):
+        raise HTTPException(422, "This resource appears to contain a credential. Remove it and use a secret manager.")
+    if "EICAR-STANDARD-ANTIVIRUS-TEST-FILE" in text:
+        raise HTTPException(422, "Known antivirus test signature detected")
+
+
+def extract_safe_docx(raw: bytes) -> str:
+    """Bound DOCX ZIP expansion and reject executable/embedded payload containers."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            entries=archive.infolist()
+            if len(entries)>2000: raise HTTPException(422,"DOCX contains too many archive entries")
+            total=sum(item.file_size for item in entries)
+            if total>40*1024*1024: raise HTTPException(413,"DOCX expands beyond the 40 MB processing limit")
+            if any(item.file_size>0 and item.file_size/max(item.compress_size,1)>100 for item in entries):
+                raise HTTPException(422,"DOCX compression ratio is unsafe")
+            names=[item.filename.lower().replace("\\","/") for item in entries]
+            if any(name.startswith("/") or ".." in name.split("/") or name.startswith("word/embeddings/") or name.endswith("vbaproject.bin") for name in names):
+                raise HTTPException(415,"DOCX contains a disallowed embedded or unsafe archive item")
+            if "word/document.xml" not in names or archive.testzip() is not None:
+                raise HTTPException(422,"DOCX archive is incomplete or damaged")
+    except zipfile.BadZipFile as exc:
+        raise HTTPException(422,"DOCX file is malformed") from exc
+    from docx import Document
+    document=Document(io.BytesIO(raw))
+    return "\n\n".join(p.text for p in document.paragraphs if p.text.strip())
 
 
 def llm_config() -> tuple[str | None, str, str]:
@@ -950,15 +1141,26 @@ def kc_delete_source(handover_id: str, source_id: str, request: Request) -> dict
 async def kc_upload_source(handover_id: str, request: Request) -> dict[str, Any]:
     user=require_roles(request,"admin","employee")
     with connect() as db: require_handover_access(db,handover_id,user,"employee")
-    body=await request.body()
-    if len(body)>11*1024*1024: raise HTTPException(413,"Upload exceeds 10 MB")
+    content_length=request.headers.get("content-length")
+    if content_length:
+        try:
+            if int(content_length)>11*1024*1024: raise HTTPException(413,"Upload exceeds the 10 MB file limit")
+        except ValueError: raise HTTPException(400,"Invalid Content-Length")
     ctype=request.headers.get("content-type","")
-    if "multipart/form-data" not in ctype: raise HTTPException(415,"Use multipart/form-data")
+    if not ctype.lower().startswith("multipart/form-data;"): raise HTTPException(415,"Use multipart/form-data")
+    body=bytearray()
+    async for chunk in request.stream():
+        body.extend(chunk)
+        if len(body)>11*1024*1024: raise HTTPException(413,"Upload exceeds the 10 MB file limit")
     from email.parser import BytesParser
     from email.policy import default
     try:
-        msg=BytesParser(policy=default).parsebytes((f"Content-Type: {ctype}\r\nMIME-Version: 1.0\r\n\r\n").encode()+body)
+        msg=BytesParser(policy=default).parsebytes((f"Content-Type: {ctype}\r\nMIME-Version: 1.0\r\n\r\n").encode()+bytes(body))
         parts=list(msg.iter_parts())
+        if len(parts)>2: raise HTTPException(400,"Upload accepts one file and one optional image description")
+        names=[p.get_param("name",header="content-disposition") for p in parts]
+        if names.count("file")!=1 or any(name not in ("file","description") for name in names) or names.count("description")>1:
+            raise HTTPException(400,"Invalid upload fields")
         part=next(p for p in parts if p.get_param("name",header="content-disposition")=="file")
         description_part=next((p for p in parts if p.get_param("name",header="content-disposition")=="description"),None)
         image_description=(description_part.get_payload(decode=True) or b"").decode("utf-8","replace").strip() if description_part else ""
@@ -966,16 +1168,23 @@ async def kc_upload_source(handover_id: str, request: Request) -> dict[str, Any]
     except Exception as exc: raise HTTPException(400,"Could not read uploaded file") from exc
     if len(raw)>10*1024*1024: raise HTTPException(413,"File exceeds the 10 MB limit")
     suffix=Path(filename).suffix.lower()
+    if len(filename)>180 or not re.fullmatch(r"[\w .()\-]{1,180}",filename,flags=re.UNICODE):
+        raise HTTPException(422,"Filename contains unsupported characters or is too long")
+    allowed={".txt",".md",".csv",".json",".log",".html",".css",".js",".jsx",".ts",".tsx",".py",".sql",".yaml",".yml",".pdf",".docx",".png",".jpg",".jpeg",".gif",".webp"}
+    if suffix not in allowed: raise HTTPException(415,"This file type is not supported. Executable files, archives, and environment files are rejected.")
     try:
         if suffix in (".txt",".md",".csv",".json",".log",".html",".css",".js",".jsx",".ts",".tsx",".py",".sql",".yaml",".yml"): text=raw.decode("utf-8-sig")
         elif suffix==".pdf":
             from pypdf import PdfReader
-            import io
-            text="\n\n".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(raw)).pages)
+            if not raw.startswith(b"%PDF-"): raise HTTPException(422,"PDF header is missing or malformed")
+            if re.search(rb"/(?:JavaScript|JS|OpenAction|AA|EmbeddedFiles|Launch|RichMedia|XFA)\b",raw,re.I):
+                raise HTTPException(415,"PDF contains active or embedded content; export a sanitized, text-only PDF")
+            reader=PdfReader(io.BytesIO(raw),strict=True)
+            if len(reader.pages)>100: raise HTTPException(413,"PDF exceeds the 100-page processing limit")
+            text="\n\n".join(page.extract_text() or "" for page in reader.pages)
+            if len(text)>2_000_000: raise HTTPException(413,"Extracted PDF text exceeds the 2 MB processing limit")
         elif suffix==".docx":
-            from docx import Document
-            import io
-            doc=Document(io.BytesIO(raw)); text="\n\n".join(p.text for p in doc.paragraphs if p.text.strip())
+            text=extract_safe_docx(raw)
         elif suffix in (".png", ".jpg", ".jpeg", ".gif", ".webp"):
             signatures={".png":raw.startswith(b"\x89PNG\r\n\x1a\n"),".jpg":raw.startswith(b"\xff\xd8\xff"),".jpeg":raw.startswith(b"\xff\xd8\xff"),".gif":raw.startswith((b"GIF87a",b"GIF89a")),".webp":len(raw)>=12 and raw[:4]==b"RIFF" and raw[8:12]==b"WEBP"}
             if not signatures[suffix]: raise HTTPException(415,"The file contents do not match the selected image format")
@@ -984,8 +1193,12 @@ async def kc_upload_source(handover_id: str, request: Request) -> dict[str, Any]
             if len(description)>3000: raise HTTPException(422,"Image description must be 3,000 characters or fewer")
             text="Contributor description of image "+filename+": "+description
         else: raise HTTPException(415,"Supported sources: TXT, MD, CSV, JSON, LOG, HTML, CSS, JS, JSX, TS, TSX, PY, SQL, YAML, YML, PDF, DOCX, PNG, JPG, JPEG, GIF, WEBP. Add a description to each image. Never upload .env files or secret values.")
+    except HTTPException: raise
     except ImportError as exc: raise HTTPException(503,"Install document parsers from requirements.txt to read PDF and DOCX") from exc
+    except (UnicodeDecodeError, ValueError, zipfile.BadZipFile) as exc: raise HTTPException(422,"Resource is malformed or cannot be safely parsed") from exc
+    except Exception as exc: raise HTTPException(422,"Resource could not be parsed safely") from exc
     if not text.strip(): raise HTTPException(422,"No readable text found in this resource")
+    validate_source_text(text)
     data={"name":filename,"source_type":suffix.lstrip("."),"content":text,"added_by":request.headers.get("x-user-name","Departing teammate"),"_upload_raw":raw,"_upload_content_type":part.get_content_type() or "application/octet-stream"}
     # Reuse the same validation and persistence path.
     class Payload:

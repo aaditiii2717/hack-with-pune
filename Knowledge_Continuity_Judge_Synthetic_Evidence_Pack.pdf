@@ -1,0 +1,566 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 4750 >>
+stream
+BT
+0.09 0.13 0.23 rg
+/F2 20 Tf
+1 0 0 1 48 748 Tm (Knowledge Continuity | Judge Evidence Pack) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 711 Tm (SYNTHETIC DEMONSTRATION DATA ONLY. Every person, date, project note, conversation, issue, test result, URL, and) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 697 Tm (email below is invented for this demo. There is no connected Gmail or WhatsApp account, no real repository, no) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 683 Tm (customer or payroll data, and no credentials. Do not treat the example setup commands or implementation claims) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 669 Tm (as verified facts about a real service.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 643 Tm (What this pack demonstrates) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 613 Tm (An intern-built software feature is handed to a senior reviewer and then to an incoming engineer. The source) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 599 Tm (trail deliberately contains both useful context and gaps: a README, WhatsApp-style decision chat, Gmail-style) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 585 Tm (departure thread, issue export, manual test log, and FAQ. Knowledge Continuity indexes these sources into stable) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 571 Tm (passages, proposes template fields with citations, preserves uncertainty and disagreement, generates follow-up) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 557 Tm (questions, and lets a reviewer approve only the information intended for the recipient.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 531 Tm (Fast judge walkthrough) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 501 Tm (1. Open the demo and choose the intern workspace. Open Human Value Calculator - first-build handoff and inspect) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 487 Tm (My resources. Six differently formatted, synthetic sources should be available.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 468 Tm (2. Open Template fields. Review the cited implementation, calculation, setup, tests, risk, and next-work) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 454 Tm (details. Notice that uncertain release information remains a question and the rounding disagreement is called) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 440 Tm (out rather than silently resolved.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 421 Tm (3. Open Senior reviewer. Inspect evidence, edit or reject a field, then approve and publish only reviewed) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 407 Tm (content.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 388 Tm (4. Open the incoming engineer workspace. Read the published version, inspect citations, ask what to do next, and) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 374 Tm (acknowledge receipt.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 348 Tm (Facts the sample evidence supports) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 318 Tm (- The fictional feature estimates weekly labor value as weekly hours saved multiplied by hourly value. This is) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 304 Tm (an estimate, not validated ROI.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 285 Tm (- The screen and estimate display work only with sample/local input according to the synthetic README; no) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 271 Tm (database persistence or customer data is evidenced.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 252 Tm (- The browser calculation is mapped to a fictional source path. An experimental API exists in the story but is) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 238 Tm (not connected.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 219 Tm (- The two documented checks are manual arithmetic examples. Automated, accessibility, negative-input,) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 205 Tm (blank-input, deployment, and load testing are not documented.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 186 Tm (- The rounding rule conflicts across the README and chat. The senior reviewer says not to decide silently.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 167 Tm (- The next engineer should verify setup, obtain the rounding decision, add validation and automated tests, and) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 153 Tm (avoid persistence until privacy decisions are made.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 134 Tm (- The deployment URL and release commit/tag are not supplied. The demo intentionally asks the reviewer to) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 120 Tm (confirm them.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 101 Tm (- No actual Gmail, WhatsApp, GitHub, or customer systems are connected.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 75 Tm (Trust and data-security behavior) Tj
+0.35 0.38 0.42 rg
+/F1 8 Tf
+1 0 0 1 48 30 Tm (Synthetic demo only  |  Page 1) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 5340 >>
+stream
+BT
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 748 Tm (The product accepts a limited allowlist of text/code/document/image types, caps uploads at 10 MB, bounds PDF) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 734 Tm (pages and DOCX archive expansion, rejects active-content PDFs, malformed files, executable/archived types,) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 720 Tm (obvious credential dumps, and known antivirus test markers. Uploaded content is parsed as data and never) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 706 Tm (executed; originals are private attachments, not rendered inline. Images require a contributor description;) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 692 Tm (image pixels are not OCR/vision analyzed. Citation checks establish that a quote exists in a supplied passage,) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 678 Tm (not that the statement is true. A human remains responsible for approval.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 652 Tm (Security limitation: this deployment does not have a configured antivirus engine such as ClamAV. These checks) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 638 Tm (reduce common upload risks but cannot guarantee malware detection. Do not upload confidential or real customer) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 624 Tm (data to the public synthetic demo.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 591 Tm (Source: Synthetic README.md) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 561 Tm (SYNTHETIC SAMPLE ? Human Value Calculator. All names, dates, repository references, and project history below) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 547 Tm (are fictional.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 521 Tm (Purpose: a small-team prototype estimates the weekly labor value of one workflow improvement. It is an estimate,) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 507 Tm (not audited ROI, a customer promise, or a validated business metric.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 481 Tm (Feature scope: one user enters weekly hours saved and an hourly value. The screen displays a weekly estimate.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 467 Tm (Multi-week forecasts, saved accounts, customer billing, and production analytics are out of scope.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 441 Tm (Current implementation: the calculator form and estimate display work with sample/local inputs. The estimate is) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 427 Tm (not saved to a database. No customer data or production credentials are included. Deployment status and last) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 413 Tm (deployed commit are not recorded in the supplied project sources.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 387 Tm (Architecture \(fictional project map\): `src/calculator/estimate.ts` holds the browser calculation;) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 373 Tm (`src/calculator/EstimateForm.tsx` owns input state; `api/estimate.py` is a local-only experimental endpoint. The) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 359 Tm (form currently calculates in the browser; the API route is not connected to the screen. No database integration) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 345 Tm (is implemented.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 319 Tm (Local setup \(fictional project\): Node.js 20; run `npm install`, then `npm run dev`. For the isolated API) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 305 Tm (experiment, create a Python 3.12 environment, run `python -m pip install -r requirements.txt`, then `python -m) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 291 Tm (uvicorn api.estimate:app --reload`. These commands have not been verified in this demo environment. No secret) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 277 Tm (values belong in a handover; ask the owner for access through the approved secret manager.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 251 Tm (Data and privacy: inputs are held in browser memory only. Do not enter personal, payroll, customer, or) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 237 Tm (confidential data. The demo uses invented numbers and has no external integrations.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 211 Tm (Decision recorded 2026-11-09: keep the first build to a weekly estimate so the team can validate the user need) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 197 Tm (before adding persistence or forecasting. The owner must approve any change to this scope.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 171 Tm (Known gaps: automated tests are absent; input validation and accessibility are incomplete; rounding behavior) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 157 Tm (conflicts across sources; zero/negative inputs are not specified; the API route is unused; no database or) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 143 Tm (production deployment is evidenced. Treat all of these as open work, not completed features.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 117 Tm (Next build order: inspect the form and estimate function; agree rounding and invalid-input behavior with the) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 103 Tm (reviewer; add unit tests; connect the API only after a reviewed contract; do not add persistence until privacy) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 89 Tm (and retention are decided.) Tj
+0.35 0.38 0.42 rg
+/F1 8 Tf
+1 0 0 1 48 30 Tm (Synthetic demo only  |  Page 2) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 4355 >>
+stream
+BT
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 748 Tm (Synthetic repository reference: `https://example.invalid/human-value-calculator` \(reserved example domain; not a) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 734 Tm (real repository\).) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 708 Tm (Source: Synthetic WhatsApp export.txt) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 678 Tm (SYNTHETIC CHAT EXPORT ? fictional participants; no real phone numbers or customer messages.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 652 Tm (2026-11-10 10:12 ? Intern: The calculator returns weekly hours saved multiplied by hourly value. I used 2) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 638 Tm (decimals in the screen, but an earlier sketch says round to a whole number. I could not find an owner decision.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 612 Tm (2026-11-10 10:18 ? Senior reviewer: Keep the conflict visible. Do not choose a rounding rule silently. Ask me) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 598 Tm (before changing the display or calling the number ROI.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 572 Tm (2026-11-10 10:24 ? Intern: I checked zero hours and a normal positive example manually. Negative hours and blank) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 558 Tm (input still need validation. I did not write automated tests.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 532 Tm (2026-11-11 15:40 ? Intern: The screen is local-only. The API experiment is not wired to it, and no database or) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 518 Tm (customer data is connected.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 492 Tm (2026-11-11 15:46 ? Senior reviewer: Before the next engineer releases anything, confirm the exact deployment/tag) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 478 Tm (with me; the exported project notes do not identify a verified staging release.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 452 Tm (Source: Synthetic Gmail departure thread.txt) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 422 Tm (SYNTHETIC EMAIL EXPORT ? illustrative Gmail-style thread only. No real mailbox was connected and no email was) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 408 Tm (sent.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 382 Tm (From: Demo Intern) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 363 Tm (To: Demo Senior Reviewer) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 344 Tm (Date: 2026-11-12) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 325 Tm (Subject: Human Value Calculator ? before I hand it over) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 299 Tm (I added the local setup commands and code map to the README. Please confirm whether the UI should show two) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 285 Tm (decimals or round to a whole number; my sources disagree. I tested one zero input and one positive input by) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 271 Tm (hand, but did not test negative or blank values. There is no saved-data flow yet. I have not captured a verified) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 257 Tm (deployment URL or commit, so please confirm that with the team before calling a build released.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 231 Tm (I did not include any API keys, passwords, customer records, or real contact details. If the next engineer needs) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 217 Tm (service access, please share it through the team's secret manager, not email or this handover.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 191 Tm (Reviewer reply \(synthetic\): Thanks. Keep rounding marked unresolved until product approves it. Add validation) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 177 Tm (and automated tests before connecting persistent data. The release tag is still unverified; ask the release) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 163 Tm (owner. Never copy secret values into a handover.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 137 Tm (Source: Synthetic issue export.csv) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 107 Tm (id,title,status,owner,priority,acceptance_criteria,dependency) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 88 Tm (HVC-14,Decide estimate rounding,Open,Senior reviewer,High,Product owner records one rounding rule and updates UI) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 74 Tm (plus tests,Product decision) Tj
+0.35 0.38 0.42 rg
+/F1 8 Tf
+1 0 0 1 48 30 Tm (Synthetic demo only  |  Page 3) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 4139 >>
+stream
+BT
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 748 Tm (HVC-15,Validate blank and negative inputs,Todo,Incoming engineer,High,Blank and negative values show clear) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 734 Tm (inline errors; valid zero remains supported,None) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 715 Tm (HVC-16,Add automated calculation tests,Todo,Incoming engineer,High,Tests cover zero positive negative blank and) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 701 Tm (chosen rounding,Agree rounding rule) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 682 Tm (HVC-17,Verify local setup and API contract,Todo,Incoming engineer,Medium,Fresh clone follows README and unused) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 668 Tm (API route is either integrated or removed,Access to repository) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 649 Tm (HVC-18,Confirm verified release identifier,Blocked,Senior reviewer,High,Reviewer confirms deployment URL and) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 635 Tm (commit/tag from release owner,Release owner confirmation) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 616 Tm (HVC-19,Decide whether results may be persisted,Open,Product owner,Medium,Document user need consent retention) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 602 Tm (and deletion before adding a database,Privacy review) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 576 Tm (Source: Synthetic test-run.log) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 546 Tm (SYNTHETIC MANUAL CHECK LOG ? not output from an automated CI run.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 520 Tm (Run date: 2026-11-10. Environment: local prototype, sample inputs only.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 494 Tm (Case: weekly hours saved = 2; hourly value = 500. Expected arithmetic before display rounding: 1000. Observed:) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 480 Tm (1000.00.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 454 Tm (Case: weekly hours saved = 0; hourly value = 500. Expected arithmetic: 0. Observed: 0.00.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 428 Tm (Not tested: blank input, negative values, decimal precision, keyboard-only use, screen-reader behavior, API) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 414 Tm (endpoint, database persistence, deployment, load, or real customer data.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 388 Tm (Result: 2 manual examples passed; this is not evidence of automated tests or production readiness.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 362 Tm (Source: Synthetic handover Q&A.md) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 332 Tm (SYNTHETIC DEMO ANSWERS ? answers are limited to the supplied fictional sources.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 306 Tm (Q: What does the feature do? A: It estimates weekly labor value from weekly hours saved multiplied by an hourly) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 292 Tm (value.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 266 Tm (Q: Is the estimate validated ROI? A: No. The README calls it an unvalidated estimate, not audited ROI or a) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 252 Tm (customer promise.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 226 Tm (Q: Where does the calculation happen? A: The fictional code map says `src/calculator/estimate.ts`; the form) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 212 Tm (currently calculates in the browser. The experimental API is not connected.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 186 Tm (Q: Is data saved? A: No. Inputs stay in browser memory; no database persistence is implemented.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 160 Tm (Q: What is complete? A: The calculator form and estimate display work with sample/local inputs. Automated tests,) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 146 Tm (complete validation, API integration, and production deployment are not evidenced.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 120 Tm (Q: What was tested? A: Two manual examples only: 2 hours at 500 gives 1000 before rounding; zero hours gives) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 106 Tm (zero. No automated test run is documented.) Tj
+0.35 0.38 0.42 rg
+/F1 8 Tf
+1 0 0 1 48 30 Tm (Synthetic demo only  |  Page 4) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 2046 >>
+stream
+BT
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 748 Tm (Q: What rounding rule is approved? A: The README and chat conflict. The reviewer explicitly says not to choose) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 734 Tm (silently; a product decision is still required.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 708 Tm (Q: What should the next engineer do first? A: Verify a fresh local setup, ask the reviewer about rounding, then) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 694 Tm (add blank/negative input validation and automated tests.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 668 Tm (Q: Is there a verified staging release? A: No supplied source names a verified deployment or commit. Confirm) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 654 Tm (with the release owner before calling any build released.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 628 Tm (Q: Where are credentials? A: No credentials are in the sample. Ask the owner for access through the approved) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 614 Tm (secret manager; never put secrets in the handover.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 588 Tm (Q: Can the estimate be used with customer or payroll data? A: No. The sample explicitly says not to enter) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 574 Tm (personal, payroll, customer, or confidential data.) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 548 Tm (Q: Why is there no persistence? A: The team deferred it until the user need, consent, retention, and deletion) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 534 Tm (behavior receive a privacy review.) Tj
+0.09 0.13 0.23 rg
+/F2 13 Tf
+1 0 0 1 48 508 Tm (Source inventory) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 478 Tm (Six synthetic inputs: README \(Markdown\), WhatsApp-style chat \(text\), Gmail-style departure thread \(text\), issue) Tj
+0.09 0.13 0.23 rg
+/F1 9 Tf
+1 0 0 1 48 464 Tm (export \(CSV\), manual test log \(log\), and handover FAQ \(Markdown\). The same source content seeds the judge demo.) Tj
+0.35 0.38 0.42 rg
+/F1 8 Tf
+1 0 0 1 48 30 Tm (Synthetic demo only  |  Page 5) Tj
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R] /Count 5 >>
+endobj
+14 0 obj
+<< /Type /Catalog /Pages 13 0 R >>
+endobj
+xref
+0 15
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000004962 00000 n 
+0000005099 00000 n 
+0000010491 00000 n 
+0000010628 00000 n 
+0000015035 00000 n 
+0000015172 00000 n 
+0000019363 00000 n 
+0000019501 00000 n 
+0000021600 00000 n 
+0000021739 00000 n 
+0000021823 00000 n 
+trailer
+<< /Size 15 /Root 14 0 R >>
+startxref
+21874
+%%EOF

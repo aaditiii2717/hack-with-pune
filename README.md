@@ -25,8 +25,17 @@ The editable-copy starter prompts for 14 areas: user outcome and acceptance crit
 - Found/inferred/missing or manual field states, focused questions for missing context, reviewer approval, recipient visibility controls, versioned publication, and acknowledgement.
 - Recipient Q&A constrained to the approved handover source set, source-linked project timeline, and an activity trail.
 - Synthetic Human Value Calculator data for the judge demo; it is fictional and not customer data.
+- Judge source pack in Markdown, DOCX, and PDF: synthetic README, WhatsApp-style chat, Gmail-style departure thread, issue CSV, manual test log, and judge FAQ. The same source set is seeded in the demo and available in the intern and published recipient workspaces.
 
 The app does not connect to GitHub, Slack, or other project systems automatically. A user must provide authorized exports or files. Citation checks establish traceability to supplied text, not that a statement is true, current, or complete.
+
+## Synthetic judge pack and safe source intake
+
+Open Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf for the judge-readable source bundle, or use the DOCX/Markdown copy to inspect and reuse the synthetic examples. The Gmail- and WhatsApp-style exports are fictional examples; the product does not connect to either service. The pack describes the supported claims, known gaps, and a suggested independent walkthrough.
+
+Uploads are limited to an allowlist, one file per request, 10 MB, and bounded extraction. PDFs are checked for a valid header, active-content markers and page/text limits. DOCX ZIP expansion, entry count, compression ratio, embedded payload paths, and archive integrity are checked before parsing. Executables and archives are not supported. Obvious private keys, credential assignments, and the EICAR antivirus test string are rejected before source indexing. Files are parsed as data, never executed, and originals are delivered as attachments rather than rendered inline. Images require a user-written description; the image itself is not OCR/vision processed.
+
+**Malware limitation:** no antivirus engine is configured in the Vercel demo. These defensive checks reduce common risks; they are not a malware scanner or a guarantee that every malicious file will be detected. The public demo must contain synthetic material only.
 
 ## Technology and data flow
 
@@ -74,7 +83,7 @@ python -m pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
 ```
 
-The acceptance tests run in a temporary SQLite database and cover health/landing, the 14-field template, reviewer-created assignment, builder submission, recipient denial before publication, reviewer approval and publication, duplicate publication rejection, role-filtered recipient access, Q&A, acknowledgement, malformed JSON, invalid empty templates, and unauthenticated access. The last local run completed 2 tests successfully. This does not replace verification against the live Vercel and Supabase deployment.
+The acceptance tests run in a temporary SQLite database and cover health/landing, the 14-field template, reviewer-created assignment, builder submission, recipient denial before publication, reviewer approval and publication, duplicate publication rejection, role-filtered recipient access, Q&A, acknowledgement, malformed JSON, invalid empty templates, unauthenticated access, idempotent mixed-source demo seeding, and upload rejection for executables, malformed documents, credential dumps, EICAR test data, and oversized files. The latest local run completed 4 tests successfully. This does not replace verification against the live Vercel and Supabase deployment.
 
 ## Limitations and next steps
 
@@ -92,5 +101,6 @@ The acceptance tests run in a temporary SQLite database and cover health/landing
 ## Submission details
 
 - Source: https://github.com/aaditiii2717/hack-with-pune
-- Live deployment: `https://knowledge-continuity-4m1bfr7il-yaye2.vercel.app` (verify before submission)
+- Live deployment: `https://knowledge-continuity-mu.vercel.app` (verify before submission)
 - Final product brief: `Knowledge_Continuity_Round3_Final_Submission.pdf`
+- Judge evidence pack: `Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf`

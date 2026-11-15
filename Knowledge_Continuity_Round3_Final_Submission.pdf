@@ -131,93 +131,126 @@ endobj
 << /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
 endobj
 5 0 obj
-<< /Length 3939 >>
+<< /Length 5450 >>
 stream
 BT
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 748 Tm (PostgreSQL persistence for source text and originals; SQLite local development.) Tj
+1 0 0 1 52 748 Tm (Judge evidence pack in Markdown, DOCX and PDF: synthetic README, WhatsApp-style chat, Gmail-style departure thread, issue) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 735 Tm (CSV, manual test log and Q&A. The synthetic evidence also seeds the intern and published recipient demos.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 722 Tm (PostgreSQL persistence for source text and originals; SQLite local development.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 709 Tm (Bounded upload parsing: 10 MB cap, allowlisted extensions, PDF active-content/page/text checks, DOCX archive) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 696 Tm (expansion/integrity checks, and rejection of obvious credential dumps and the EICAR test signature. Uploaded files are) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 683 Tm (data, never executed, and originals download as attachments.) Tj
 0.05 0.45 0.42 rg
 /F2 16 Tf
-1 0 0 1 52 735 Tm (Architecture and implementation) Tj
+1 0 0 1 52 670 Tm (Architecture and implementation) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 713 Tm (Responsive HTML/CSS/browser JavaScript is served by a Python 3.12 FastAPI application. SQLite supports local use; Supabase) Tj
+1 0 0 1 52 648 Tm (Responsive HTML/CSS/browser JavaScript is served by a Python 3.12 FastAPI application. SQLite supports local use; Supabase) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 700 Tm (PostgreSQL via its transaction pooler persists hosted data. PDF and DOCX parsing use pypdf and python-docx. Groq or) Tj
+1 0 0 1 52 635 Tm (PostgreSQL via its transaction pooler persists hosted data. PDF and DOCX parsing use pypdf and python-docx. Groq or) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 687 Tm (OpenAI-compatible models can draft structured values; the server verifies cited passage IDs and exact quote text. Without) Tj
+1 0 0 1 52 622 Tm (OpenAI-compatible models can draft structured values; the server verifies cited passage IDs and exact quote text. Without) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 674 Tm (a provider key, local matching and evidence excerpts remain available. A human reviewer remains responsible for truth and) Tj
+1 0 0 1 52 609 Tm (a provider key, local matching and evidence excerpts remain available. A human reviewer remains responsible for truth and) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 661 Tm (publication.) Tj
+1 0 0 1 52 596 Tm (publication.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 648 Tm (Authorized source ? normalized text ? stable passages ? proposed field and citations ? server validation ? human) Tj
+1 0 0 1 52 583 Tm (Authorized source ? normalized text ? stable passages ? proposed field and citations ? server validation ? human) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 635 Tm (edit/approval ? role-filtered versioned handover.) Tj
+1 0 0 1 52 570 Tm (edit/approval ? role-filtered versioned handover.) Tj
 0.05 0.45 0.42 rg
 /F2 16 Tf
-1 0 0 1 52 622 Tm (Verification) Tj
+1 0 0 1 52 557 Tm (Verification) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 600 Tm (Local acceptance command: python -m unittest discover -s tests -v. The last run passed 2 tests. Coverage includes health) Tj
+1 0 0 1 52 535 Tm (Local acceptance command: python -m unittest discover -s tests -v. The latest run passed 4 tests. Coverage includes health) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 587 Tm (and landing, the 14-field starter, reviewer assignment, builder submission, recipient denial before publication, field) Tj
+1 0 0 1 52 522 Tm (and landing, the 14-field starter, reviewer assignment, builder submission, recipient denial before publication, field) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 574 Tm (approval, publication, duplicate publish rejection, recipient filtering, Q&A, acknowledgement, unauthenticated access,) Tj
+1 0 0 1 52 509 Tm (approval, publication, duplicate publish rejection, recipient filtering, Q&A, acknowledgement, unauthenticated access,) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 561 Tm (malformed JSON, and invalid empty templates. The test suite uses isolated temporary SQLite and synthetic data. The project) Tj
+1 0 0 1 52 496 Tm (malformed JSON, invalid empty templates, idempotent mixed-source demo seeding, and rejection of executable, malformed,) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 548 Tm (owner reports the Vercel runtime error is cleared; the live URL still needs a final private-window smoke check.) Tj
+1 0 0 1 52 483 Tm (credential-containing, EICAR test, and oversized uploads. The test suite uses isolated temporary SQLite and synthetic) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 470 Tm (data.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 457 Tm (Security limit: the hosted demo has no configured antivirus engine. The upload checks reduce common risks but do not) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 444 Tm (guarantee malware detection. Keep the public demo synthetic-only; citation checks prove quote traceability, not truth.) Tj
 0.05 0.45 0.42 rg
 /F2 16 Tf
-1 0 0 1 52 535 Tm (Setup and submission links) Tj
+1 0 0 1 52 431 Tm (Setup and submission links) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 513 Tm (Repository: https://github.com/aaditiii2717/hack-with-pune) Tj
+1 0 0 1 52 409 Tm (Repository: https://github.com/aaditiii2717/hack-with-pune) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 500 Tm (Deployment reported by project owner: https://knowledge-continuity-4m1bfr7il-yaye2.vercel.app) Tj
+1 0 0 1 52 396 Tm (Current production domain shown in Vercel: https://knowledge-continuity-mu.vercel.app \(open and verify the live workflow) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 487 Tm (Local: create a Python virtual environment, install requirements.txt, copy .env.example to .env, then run python -m) Tj
+1 0 0 1 52 383 Tm (before submitting\).) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 474 Tm (uvicorn server:app --host 127.0.0.1 --port 8000. Keep .env and database credentials out of Git. Hosted Vercel requires) Tj
+1 0 0 1 52 370 Tm (Judge evidence pack: Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf; editable copy:) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 461 Tm (DATABASE_URL \(Supabase transaction pooler\), KC_DEMO_MODE=1 for fictional judging data, and COOKIE_SECURE=1; an AI provider) Tj
+1 0 0 1 52 357 Tm (Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.docx.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 448 Tm (key is optional.) Tj
+1 0 0 1 52 344 Tm (Local: create a Python virtual environment, install requirements.txt, copy .env.example to .env, then run python -m) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 331 Tm (uvicorn server:app --host 127.0.0.1 --port 8000. Keep .env and database credentials out of Git. Hosted Vercel requires) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 318 Tm (DATABASE_URL \(Supabase transaction pooler\), KC_DEMO_MODE=1 for fictional judging data, and COOKIE_SECURE=1; an AI provider) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 305 Tm (key is optional.) Tj
 0.05 0.45 0.42 rg
 /F2 16 Tf
-1 0 0 1 52 435 Tm (Known limits and roadmap) Tj
+1 0 0 1 52 292 Tm (Known limits and roadmap) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 413 Tm (The demo bypasses login and must contain synthetic data only. Account provisioning is owner-managed; there is no email) Tj
+1 0 0 1 52 270 Tm (The demo bypasses login and must contain synthetic data only. Account provisioning is owner-managed; there is no email) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 400 Tm (invite/password-reset service or automatic GitHub/Slack connector. Organization-level tenant isolation, independent) Tj
+1 0 0 1 52 257 Tm (invite/password-reset service or automatic GitHub/Slack connector. Organization-level tenant isolation, independent) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 387 Tm (security audit, backup/restore drills, production monitoring, and formal retention controls remain future operational) Tj
+1 0 0 1 52 244 Tm (security audit, backup/restore drills, production monitoring, and formal retention controls remain future operational) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 374 Tm (work. The next development phase should prioritize secure invitations and account recovery, integration-backed source) Tj
+1 0 0 1 52 231 Tm (work. The next development phase should prioritize secure invitations and account recovery, integration-backed source) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 361 Tm (sync, stronger organization and retention controls, and operational monitoring/restore validation.) Tj
+1 0 0 1 52 218 Tm (sync, stronger organization and retention controls, and operational monitoring/restore validation.) Tj
 ET
 endstream
 endobj
@@ -238,11 +271,11 @@ xref
 0000000160 00000 n 
 0000005277 00000 n 
 0000005413 00000 n 
-0000009404 00000 n 
-0000009540 00000 n 
-0000009603 00000 n 
+0000010915 00000 n 
+0000011051 00000 n 
+0000011114 00000 n 
 trailer
 << /Size 9 /Root 8 0 R >>
 startxref
-9652
+11163
 %%EOF

@@ -68,7 +68,9 @@ for item in [
     'TXT, Markdown, CSV, JSON, LOG, web/code text formats, PDF, DOCX, PNG, JPEG, GIF, and WebP intake (10 MB per file). Images are stored privately; a contributor description is indexed and cited. No OCR/vision is claimed.',
     'Stable source passage IDs, structured AI-assisted extraction when configured, citation checks, and local source-matching fallback.',
     'Human approval, field-level visibility, versioned publication, recipient Q&A over approved sources, timeline, and acknowledgement.',
+    'Judge evidence pack in Markdown, DOCX and PDF: synthetic README, WhatsApp-style chat, Gmail-style departure thread, issue CSV, manual test log and Q&A. The synthetic evidence also seeds the intern and published recipient demos.',
     'PostgreSQL persistence for source text and originals; SQLite local development.',
+    'Bounded upload parsing: 10 MB cap, allowlisted extensions, PDF active-content/page/text checks, DOCX archive expansion/integrity checks, and rejection of obvious credential dumps and the EICAR test signature. Uploaded files are data, never executed, and originals download as attachments.',
 ]: doc.add_paragraph(item, style='List Bullet')
 
 doc.add_heading('Architecture and implementation', level=1)
@@ -76,11 +78,13 @@ doc.add_paragraph('Responsive HTML/CSS/browser JavaScript is served by a Python 
 doc.add_paragraph('Authorized source → normalized text → stable passages → proposed field and citations → server validation → human edit/approval → role-filtered versioned handover.', style='Intense Quote')
 
 doc.add_heading('Verification', level=1)
-doc.add_paragraph('Local acceptance command: python -m unittest discover -s tests -v. The last run passed 2 tests. Coverage includes health and landing, the 14-field starter, reviewer assignment, builder submission, recipient denial before publication, field approval, publication, duplicate publish rejection, recipient filtering, Q&A, acknowledgement, unauthenticated access, malformed JSON, and invalid empty templates. The test suite uses isolated temporary SQLite and synthetic data. The project owner reports the Vercel runtime error is cleared; the live URL still needs a final private-window smoke check.')
+doc.add_paragraph('Local acceptance command: python -m unittest discover -s tests -v. The latest run passed 4 tests. Coverage includes health and landing, the 14-field starter, reviewer assignment, builder submission, recipient denial before publication, field approval, publication, duplicate publish rejection, recipient filtering, Q&A, acknowledgement, unauthenticated access, malformed JSON, invalid empty templates, idempotent mixed-source demo seeding, and rejection of executable, malformed, credential-containing, EICAR test, and oversized uploads. The test suite uses isolated temporary SQLite and synthetic data.')
+doc.add_paragraph('Security limit: the hosted demo has no configured antivirus engine. The upload checks reduce common risks but do not guarantee malware detection. Keep the public demo synthetic-only; citation checks prove quote traceability, not truth.')
 
 doc.add_heading('Setup and submission links', level=1)
 doc.add_paragraph('Repository: https://github.com/aaditiii2717/hack-with-pune')
-doc.add_paragraph('Deployment reported by project owner: https://knowledge-continuity-4m1bfr7il-yaye2.vercel.app')
+doc.add_paragraph('Current production domain shown in Vercel: https://knowledge-continuity-mu.vercel.app (open and verify the live workflow before submitting).')
+doc.add_paragraph('Judge evidence pack: Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf; editable copy: Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.docx.')
 doc.add_paragraph('Local: create a Python virtual environment, install requirements.txt, copy .env.example to .env, then run python -m uvicorn server:app --host 127.0.0.1 --port 8000. Keep .env and database credentials out of Git. Hosted Vercel requires DATABASE_URL (Supabase transaction pooler), KC_DEMO_MODE=1 for fictional judging data, and COOKIE_SECURE=1; an AI provider key is optional.')
 
 doc.add_heading('Known limits and roadmap', level=1)

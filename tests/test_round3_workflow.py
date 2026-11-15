@@ -120,6 +120,43 @@ class HandoverJourneyTests(unittest.TestCase):
         invalid_template = self.client.post("/api/kc/templates", json={"name":"Empty","fields":[]})
         self.assertEqual(invalid_template.status_code, 422)
 
+    def test_judge_demo_has_mixed_synthetic_sources_and_recipient_view(self) -> None:
+        self.demo_login("employee")
+        detail=self.client.get("/api/kc/handovers/demo-software-handover")
+        self.assertEqual(detail.status_code,200,detail.text)
+        names={source["name"] for source in detail.json()["sources"]}
+        self.assertTrue({"Synthetic README.md","Synthetic WhatsApp export.txt","Synthetic Gmail departure thread.txt","Synthetic issue export.csv","Synthetic test-run.log","Synthetic handover Q&A.md"}.issubset(names))
+        # Repeated seed/startup must not multiply demo resources or passages.
+        with server.connect() as db:
+            before=db.execute("SELECT COUNT(*) n FROM kc_sources WHERE handover_id='demo-software-handover'").fetchone()["n"]
+            server.ensure_demo_workspace(db)
+            after=db.execute("SELECT COUNT(*) n FROM kc_sources WHERE handover_id='demo-software-handover'").fetchone()["n"]
+        self.assertEqual(before,after)
+        self.demo_login("recipient")
+        public=self.client.get("/api/kc/handovers/demo-published-handover/recipient")
+        self.assertEqual(public.status_code,200,public.text)
+        self.assertTrue(public.json()["sources"])
+        self.assertTrue(all(field["approved"] and field["citations"] for field in public.json()["fields"]))
+
+    def test_upload_rejects_executables_bad_documents_and_credential_dumps(self) -> None:
+        self.demo_login("employee")
+        path="/api/kc/handovers/demo-software-handover/upload"
+        cases=[
+            (("payload.exe",b"MZ\x00\x00","application/octet-stream"),415),
+            (("broken.pdf",b"not a pdf","application/pdf"),422),
+            (("notes.txt",b"password=SuperSecretValue123456","text/plain"),422),
+            (("eicar.txt",b"EICAR-STANDARD-ANTIVIRUS-TEST-FILE","text/plain"),422),
+            (("broken.docx",b"not a zip archive","application/vnd.openxmlformats-officedocument.wordprocessingml.document"),422),
+        ]
+        for (name,payload,mime),expected in cases:
+            response=self.client.post(path,files={"file":(name,payload,mime)})
+            self.assertEqual(response.status_code,expected,(name,response.text))
+        self.assertEqual(self.client.post(path,files={"file":("large.txt",b"x"*(10*1024*1024+1),"text/plain")}).status_code,413)
+        pack=server.BASE/"Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf"
+        if pack.exists():
+            accepted=self.client.post(path,files={"file":(pack.name,pack.read_bytes(),"application/pdf")})
+            self.assertEqual(accepted.status_code,200,accepted.text)
+
 
 if __name__ == "__main__":
     unittest.main()
