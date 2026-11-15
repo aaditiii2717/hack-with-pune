@@ -114,11 +114,42 @@ class HandoverJourneyTests(unittest.TestCase):
 
     def test_invalid_input_and_unauthenticated_access_fail_cleanly(self) -> None:
         self.assertEqual(self.client.get("/api/kc/handovers").status_code, 401)
-        self.demo_login("admin")
+        self.assertEqual(self.client.get("/api/kc/templates").status_code, 401)
+        self.assertEqual(self.client.get("/api/projects").status_code, 404)
+        self.assertEqual(self.client.get("/api/projects/proj_mehta/dashboard").status_code, 404)
+        with server.connect() as db:
+            db.execute("INSERT INTO kc_users VALUES(?,?,?,?,?,?,?)",("usr_test_admin","test-admin@example.test","Test Admin","admin",server.password_hash("test password long enough"),1,server.now()))
+        login=self.client.post("/api/kc/auth/login",json={"email":"test-admin@example.test","password":"test password long enough"})
+        self.assertEqual(login.status_code,200,login.text)
         malformed = self.client.post("/api/kc/templates", content="{", headers={"content-type":"application/json"})
         self.assertEqual(malformed.status_code, 400)
         invalid_template = self.client.post("/api/kc/templates", json={"name":"Empty","fields":[]})
         self.assertEqual(invalid_template.status_code, 422)
+        secret_note = self.client.post("/api/kc/handovers/demo-software-handover/sources", json={"name":"Secrets","content":"password=ThisIsASecretCredential123"})
+        self.assertEqual(secret_note.status_code, 422)
+
+    def test_public_demo_is_limited_to_synthetic_accounts_templates_and_handovers(self) -> None:
+        # A real workspace may share this hosted database; the public demo identity
+        # must not gain access to its users, custom templates, or handover records.
+        with server.connect() as db:
+            stamp=server.now()
+            db.execute("INSERT INTO kc_users VALUES(?,?,?,?,?,?,?)",("usr_private","owner@example.test","Private Owner","admin","unused",1,stamp))
+            db.execute("INSERT INTO kc_templates VALUES(?,?,?,?,?,?,?,?)",("tpl_private","Confidential Process", "Private", "Custom", 0, "[]", stamp, stamp))
+            db.execute("INSERT INTO kc_handovers(id,title,template_id,departing_person,recipient,owner,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)",("ho_private","Private handover","software-project","Owner","Recipient","Owner","Draft",stamp,stamp))
+
+        self.demo_login("admin")
+        users=self.client.get("/api/kc/users")
+        self.assertEqual(users.status_code,200,users.text)
+        self.assertEqual({u["id"] for u in users.json()},{"demo_admin","demo_intern","demo_engineer"})
+        templates=self.client.get("/api/kc/templates")
+        self.assertEqual(templates.status_code,200,templates.text)
+        self.assertNotIn("Confidential Process",{t["name"] for t in templates.json()})
+        handovers=self.client.get("/api/kc/handovers")
+        self.assertEqual(handovers.status_code,200,handovers.text)
+        self.assertNotIn("ho_private",{h["id"] for h in handovers.json()})
+        self.assertEqual(self.client.get("/api/kc/handovers/ho_private").status_code,403)
+        self.assertEqual(self.client.post("/api/kc/handovers/ho_private/publish").status_code,403)
+        self.assertEqual(self.client.post("/api/kc/users",json={"email":"new@example.test","display_name":"New","role":"employee","temporary_password":"long password 123"}).status_code,403)
 
     def test_judge_demo_has_mixed_synthetic_sources_and_recipient_view(self) -> None:
         self.demo_login("employee")

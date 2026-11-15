@@ -36,6 +36,9 @@ if not USE_POSTGRES:
     UPLOADS.mkdir(parents=True, exist_ok=True)
 app = FastAPI(title="Knowledge Continuity API", version="1.0.0")
 MODEL_LAST_ERROR = False
+DEMO_ADMIN_ID = "demo_admin"
+DEMO_USER_IDS = ("demo_admin", "demo_intern", "demo_engineer")
+LEGACY_SITEWISE_API = ("/api/projects", "/api/changes", "/api/files")
 
 
 @app.exception_handler(json.JSONDecodeError)
@@ -101,6 +104,11 @@ def session_user(token: str | None) -> dict[str, Any] | None:
 
 @app.middleware("http")
 async def kc_auth_middleware(request: Request, call_next):
+    # Sitewise was the prototype before the team selected Knowledge Continuity.
+    # Its unauthenticated endpoints are not part of this product and must not
+    # remain an alternate public read/write surface in the deployment.
+    if any(request.url.path == prefix or request.url.path.startswith(prefix + "/") for prefix in LEGACY_SITEWISE_API):
+        return JSONResponse({"detail":"Not found"},status_code=404)
     if request.url.path.startswith("/api/kc/") and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
         origin = request.headers.get("origin")
         if origin:
@@ -133,9 +141,13 @@ def require_roles(request: Request, *roles: str) -> dict[str, Any]:
     return user
 
 
+def is_public_demo_user(user: dict[str, Any]) -> bool:
+    return user.get("id") in DEMO_USER_IDS
+
+
 def require_handover_access(db: sqlite3.Connection, handover_id: str, user: dict[str, Any], *roles: str) -> None:
-    if user["role"] == "admin": return
-    if roles and user["role"] not in roles: raise HTTPException(403,"This action is not available for your role")
+    if user["role"] == "admin" and user["id"] != DEMO_ADMIN_ID: return
+    if user["role"] != "admin" and roles and user["role"] not in roles: raise HTTPException(403,"This action is not available for your role")
     if not db.execute("SELECT 1 FROM kc_handover_access WHERE handover_id=? AND user_id=?",(handover_id,user["id"])).fetchone():
         raise HTTPException(403,"This handover is not assigned to your account")
 
@@ -909,6 +921,7 @@ async def kc_auth_setup(request: Request):
 @app.post("/api/kc/auth/login")
 async def kc_auth_login(request: Request):
     data=await request.json(); email=str(data.get("email","")).strip().lower(); password=str(data.get("password",""))
+    if len(email)>254 or len(password)>256: raise HTTPException(422,"Email or password exceeds the supported length")
     with connect() as db:
         user=db.execute("SELECT * FROM kc_users WHERE email=? AND active=1",(email,)).fetchone()
         if not user or not password_matches(password,user["password_hash"]): raise HTTPException(401,"Email or password is incorrect")
@@ -943,13 +956,18 @@ def kc_auth_logout(request: Request):
 
 @app.get("/api/kc/users")
 def kc_users(request: Request) -> list[dict[str, Any]]:
-    require_roles(request,"admin")
-    with connect() as db: return [dict(r) for r in db.execute("SELECT id,email,display_name,role,active,created_at FROM kc_users ORDER BY role,display_name")]
+    user=require_roles(request,"admin")
+    with connect() as db:
+        if is_public_demo_user(user):
+            return [dict(r) for r in db.execute("SELECT id,email,display_name,role,active,created_at FROM kc_users WHERE id IN (?,?,?) ORDER BY role,display_name",DEMO_USER_IDS)]
+        return [dict(r) for r in db.execute("SELECT id,email,display_name,role,active,created_at FROM kc_users ORDER BY role,display_name")]
 
 
 @app.post("/api/kc/users")
 async def kc_create_user(request: Request) -> dict[str, Any]:
-    require_roles(request,"admin"); data=await request.json(); email=str(data.get("email","")).strip().lower(); name=str(data.get("display_name","")).strip(); role=str(data.get("role","")); password=str(data.get("temporary_password",""))
+    user=require_roles(request,"admin")
+    if is_public_demo_user(user): raise HTTPException(403,"Account management is disabled in the public synthetic demo")
+    data=await request.json(); email=str(data.get("email","")).strip().lower(); name=str(data.get("display_name","")).strip(); role=str(data.get("role","")); password=str(data.get("temporary_password",""))
     if not email or "@" not in email or not name or role not in ("employee","recipient") or len(password)<12: raise HTTPException(422,"Provide a valid email, name, Employee or Recipient role, and a temporary password of at least 12 characters")
     with connect() as db:
         uid="usr_"+uuid.uuid4().hex[:12]
@@ -962,9 +980,14 @@ async def kc_create_user(request: Request) -> dict[str, Any]:
 
 
 @app.get("/api/kc/templates")
-def kc_templates() -> list[dict[str, Any]]:
+def kc_templates(request: Request) -> list[dict[str, Any]]:
+    user=require_roles(request,"admin")
     with connect() as db:
-        return [{**dict(r), "fields": json.loads(r["fields_json"])} for r in db.execute("SELECT * FROM kc_templates ORDER BY is_default DESC,name")]
+        if is_public_demo_user(user):
+            rows=db.execute("SELECT * FROM kc_templates WHERE is_default=1 ORDER BY is_default DESC,name")
+        else:
+            rows=db.execute("SELECT * FROM kc_templates ORDER BY is_default DESC,name")
+        return [{**dict(r), "fields": json.loads(r["fields_json"])} for r in rows]
 
 
 def clean_template_fields(fields: Any) -> list[dict[str, Any]]:
@@ -983,7 +1006,8 @@ def clean_template_fields(fields: Any) -> list[dict[str, Any]]:
 
 @app.post("/api/kc/templates")
 async def kc_create_template(request: Request) -> dict[str, Any]:
-    require_roles(request,"admin")
+    user=require_roles(request,"admin")
+    if is_public_demo_user(user): raise HTTPException(403,"Template management is disabled in the public synthetic demo")
     data = await request.json(); name = str(data.get("name", "")).strip(); fields = data.get("fields")
     if not name or len(name)>120: raise HTTPException(422,"Template name must be between 1 and 120 characters")
     clean=clean_template_fields(fields)
@@ -995,7 +1019,8 @@ async def kc_create_template(request: Request) -> dict[str, Any]:
 
 @app.put("/api/kc/templates/{template_id}")
 async def kc_update_template(template_id: str, request: Request) -> dict[str, Any]:
-    require_roles(request,"admin")
+    user=require_roles(request,"admin")
+    if is_public_demo_user(user): raise HTTPException(403,"Template management is disabled in the public synthetic demo")
     data=await request.json()
     with connect() as db:
         old=db.execute("SELECT * FROM kc_templates WHERE id=?",(template_id,)).fetchone()
@@ -1054,7 +1079,9 @@ def kc_handovers(request: Request) -> list[dict[str, Any]]:
     user=require_roles(request)
     with connect() as db:
         sql="SELECT h.*,t.name AS template_name,(SELECT COUNT(*) FROM kc_sources s WHERE s.handover_id=h.id) AS source_count,(SELECT COUNT(*) FROM kc_fields f WHERE f.handover_id=h.id AND f.state='Missing') AS missing_count FROM kc_handovers h JOIN kc_templates t ON t.id=h.template_id"
-        if user["role"]=="admin": rows=db.execute(sql+" ORDER BY h.updated_at DESC").fetchall()
+        if user["role"]=="admin" and user["id"]==DEMO_ADMIN_ID:
+            rows=db.execute(sql+" JOIN kc_handover_access a ON a.handover_id=h.id WHERE a.user_id=? AND a.role='admin' ORDER BY h.updated_at DESC",(user["id"],)).fetchall()
+        elif user["role"]=="admin": rows=db.execute(sql+" ORDER BY h.updated_at DESC").fetchall()
         elif user["role"]=="employee": rows=db.execute(sql+" JOIN kc_handover_access a ON a.handover_id=h.id WHERE a.user_id=? AND a.role='employee' ORDER BY h.updated_at DESC",(user["id"],)).fetchall()
         else: rows=db.execute(sql+" JOIN kc_handover_access a ON a.handover_id=h.id WHERE a.user_id=? AND a.role='recipient' AND h.status='Published' ORDER BY h.updated_at DESC",(user["id"],)).fetchall()
         result=[dict(r) for r in rows]
@@ -1099,6 +1126,8 @@ async def kc_add_source(handover_id: str, request: Request) -> dict[str, Any]:
     data=await request.json(); content=str(data.get("content","")).strip(); name=str(data.get("name","Pasted notes")).strip()
     if not content: raise HTTPException(422,"Source text is empty")
     if len(content)>2_000_000: raise HTTPException(413,"Source exceeds the 2 MB text limit")
+    if not name or len(name)>180: raise HTTPException(422,"Resource title must be between 1 and 180 characters")
+    validate_source_text(content)
     with connect() as db:
         kc_handover(db,handover_id); require_handover_access(db,handover_id,user,"employee"); sid="src_"+uuid.uuid4().hex[:12]; t=now()
         db.execute("INSERT INTO kc_sources VALUES(?,?,?,?,?,?,?,?)",(sid,handover_id,name,str(data.get("source_type","text"))[:40],content,str(data.get("added_by","Departing teammate"))[:120],str(data.get("audience","Owner and handover team"))[:120],t))
@@ -1295,6 +1324,14 @@ async def kc_update_field(field_id: str, request: Request) -> dict[str, Any]:
         require_handover_access(db,f["handover_id"],user,"employee")
         allowed={"value","state"} if user["role"]=="employee" else {"label","value","state","owner_note","visible_to_recipient"}
         updates={k:data[k] for k in allowed if k in data}
+        if "value" in updates:
+            updates["value"]=str(updates["value"])
+            if len(updates["value"])>20_000: raise HTTPException(413,"Field content exceeds the 20,000 character limit")
+            validate_source_text(updates["value"])
+        if "owner_note" in updates:
+            updates["owner_note"]=str(updates["owner_note"])
+            if len(updates["owner_note"])>5_000: raise HTTPException(413,"Reviewer note exceeds the 5,000 character limit")
+            validate_source_text(updates["owner_note"])
         if updates.get("state") == "Manual": updates["citations_json"] = "[]"
         if "state" in updates and updates["state"] not in ("Found","Inferred","Missing","Manual"):
             raise HTTPException(422,"Unknown field state")
@@ -1315,6 +1352,7 @@ def kc_approve_field(field_id: str, request: Request) -> dict[str, Any]:
     with connect() as db:
         f=db.execute("SELECT * FROM kc_fields WHERE id=?",(field_id,)).fetchone()
         if not f: raise HTTPException(404,"Template field not found")
+        require_handover_access(db,f["handover_id"],user,"admin")
         if not f["value"].strip(): raise HTTPException(409,"Add or confirm content before approving this field")
         cites=json.loads(f["citations_json"])
         passages={r["id"]:r["text"] for r in db.execute("SELECT p.id,p.text FROM kc_passages p JOIN kc_sources s ON s.id=p.source_id WHERE s.handover_id=?",(f["handover_id"],))}
@@ -1330,6 +1368,8 @@ async def kc_answer_question(question_id: str, request: Request) -> dict[str, An
     user=require_roles(request,"admin","employee")
     data=await request.json(); answer=str(data.get("answer","")).strip()
     if not answer: raise HTTPException(422,"An answer is required")
+    if len(answer)>20_000: raise HTTPException(413,"Answer exceeds the 20,000 character limit")
+    validate_source_text(answer)
     with connect() as db:
         q=db.execute("SELECT * FROM kc_questions WHERE id=?",(question_id,)).fetchone()
         if not q: raise HTTPException(404,"Question not found")
@@ -1351,9 +1391,10 @@ async def kc_answer_question(question_id: str, request: Request) -> dict[str, An
 
 @app.post("/api/kc/handovers/{handover_id}/publish")
 def kc_publish(handover_id: str, request: Request) -> dict[str, Any]:
-    require_roles(request,"admin")
+    user=require_roles(request,"admin")
     with connect() as db:
         h=kc_handover(db,handover_id)
+        require_handover_access(db,handover_id,user,"admin")
         if h["status"] not in ("Submitted","In review"): raise HTTPException(409,"The employee must submit this handover before owner publication")
         total=db.execute("SELECT COUNT(*) FROM kc_fields WHERE handover_id=? AND visible_to_recipient=1",(handover_id,)).fetchone()[0]
         approved=db.execute("SELECT COUNT(*) FROM kc_fields WHERE handover_id=? AND visible_to_recipient=1 AND approved=1",(handover_id,)).fetchone()[0]
@@ -1391,6 +1432,8 @@ async def kc_ask(handover_id: str, request: Request) -> dict[str, Any]:
     user=require_roles(request,"admin","recipient")
     data=await request.json(); question=str(data.get("question","")).strip()
     if not question: raise HTTPException(422,"Enter a question")
+    if len(question)>2_000: raise HTTPException(413,"Question exceeds the 2,000 character limit")
+    validate_source_text(question)
     with connect() as db:
         h=kc_handover(db,handover_id)
         if h["status"]!="Published": raise HTTPException(403,"Handover Q&A is available only from a senior-approved published handover")

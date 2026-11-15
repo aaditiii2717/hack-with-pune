@@ -55,7 +55,7 @@ doc.add_heading('The three Round 2 commitments', level=1)
 for title, body in [
     ('1  Better template — delivered', 'The software handover starter now has 14 sections: user outcome and acceptance criteria; scope; delivery status and proof; architecture and code map; reproducible setup; data/API contracts; logic and assumptions; decisions and chronology; test evidence; known defects/security/privacy risks; dependencies and ownership; prioritized next work; canonical references; and a first-day continuation plan. Owners copy and adapt the starter.'),
     ('2  Better hierarchy — delivered', 'The app makes the senior reviewer/owner → intern/builder → incoming engineer responsibilities explicit. Assignment, submission, approval, publication, and recipient access are enforced by the API, including per-field recipient visibility.'),
-    ('3  Production-ready system — Round 3 hardening delivered', 'Hosted PostgreSQL support for serverless deployment; secure session-cookie settings; server-side role and assignment checks; citation ID/quote validation; safe recipient filtering; malformed JSON and invalid-template handling; concurrent first-owner setup protection; duplicate-publication rejection; and end-to-end role-journey acceptance tests. Remaining operational work is disclosed below; this hackathon build has not had an independent security audit.'),
+    ('3  Production-readiness hardening — Round 3 work delivered; operational readiness remains', 'Hosted PostgreSQL support for serverless deployment; secure session-cookie settings; server-side role and assignment checks; public-demo scoping; retired API shutdown; source credential checks; citation ID/quote validation; recipient filtering; malformed-input handling; duplicate-publication rejection; and end-to-end role-journey acceptance tests. Login throttling, antivirus, independent security review, formal tenant isolation, backups, and monitoring remain outstanding; this is a hackathon MVP, not a production certification.'),
 ]:
     p = doc.add_paragraph(style='List Number')
     p.add_run(title + ': ').bold = True
@@ -75,11 +75,11 @@ for item in [
 
 doc.add_heading('Architecture and implementation', level=1)
 doc.add_paragraph('Responsive HTML/CSS/browser JavaScript is served by a Python 3.12 FastAPI application. SQLite supports local use; Supabase PostgreSQL via its transaction pooler persists hosted data. PDF and DOCX parsing use pypdf and python-docx. Groq or OpenAI-compatible models can draft structured values; the server verifies cited passage IDs and exact quote text. Without a provider key, local matching and evidence excerpts remain available. A human reviewer remains responsible for truth and publication.')
-doc.add_paragraph('Authorized source → normalized text → stable passages → proposed field and citations → server validation → human edit/approval → role-filtered versioned handover.', style='Intense Quote')
+doc.add_paragraph('Authorized sources, then normalized text, then stable passages, then proposed fields with citations, then server validation and human review, then an approved role-filtered handover.', style='Intense Quote')
 
 doc.add_heading('Verification', level=1)
-doc.add_paragraph('Local acceptance command: python -m unittest discover -s tests -v. The latest run passed 4 tests. Coverage includes health and landing, the 14-field starter, reviewer assignment, builder submission, recipient denial before publication, field approval, publication, duplicate publish rejection, recipient filtering, Q&A, acknowledgement, unauthenticated access, malformed JSON, invalid empty templates, idempotent mixed-source demo seeding, and rejection of executable, malformed, credential-containing, EICAR test, and oversized uploads. The test suite uses isolated temporary SQLite and synthetic data.')
-doc.add_paragraph('Security limit: the hosted demo has no configured antivirus engine. The upload checks reduce common risks but do not guarantee malware detection. Keep the public demo synthetic-only; citation checks prove quote traceability, not truth.')
+doc.add_paragraph('Local acceptance command: python -m unittest discover -s tests -v. The latest local run passed 5 tests on 16 November 2026. Coverage includes health and landing, the 14-field starter, reviewer assignment, builder submission, recipient denial before publication, field approval, publication, duplicate publish rejection, recipient filtering, Q&A, acknowledgement, unauthenticated access, malformed JSON, invalid empty templates, idempotent mixed-source demo seeding, demo isolation from real accounts/templates/unassigned handovers, retired Sitewise API denial, source credential rejection, and rejection of executable, malformed, credential-containing, EICAR test, and oversized uploads. The test suite uses isolated temporary SQLite and synthetic data.')
+doc.add_paragraph('The public demo uses shared synthetic role sessions and sample state can be changed by visitors. Demo identities are restricted to explicitly assigned synthetic handovers and built-in templates; account/template administration and retired Sitewise APIs are disabled. Never enter customer data or secrets. There is no antivirus engine, login rate limiter, independent security review, formal tenant isolation, backup/restore drill, or monitoring. Upload checks reduce common risks but do not guarantee malware detection; citation checks prove traceability, not truth.')
 
 doc.add_heading('Setup and submission links', level=1)
 doc.add_paragraph('Repository: https://github.com/aaditiii2717/hack-with-pune')
@@ -108,7 +108,8 @@ for paragraph in doc.paragraphs:
     size = 23 if style == 'Title' else (16 if style == 'Heading 1' else (11 if style == 'Heading 2' else 9))
     leading = size + (6 if size >= 16 else 4)
     usable = max(40, int(540 / (size * .49)))
-    words = text.encode('ascii', 'replace').decode('ascii').split()
+    text = text.replace("\u2192", "to").replace("\u2014", "-").replace("\u2013", "-").replace("\u2019", "\'").replace("\u2018", "\'").replace("\u201c", "\"").replace("\u201d", "\"").replace("\u00b7", "/").replace("\u00d7", "x").replace("\u2197", "")
+    words = text.encode('ascii', 'ignore').decode('ascii').split()
     lines: list[str] = []
     current = ''
     for word in words:

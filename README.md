@@ -31,11 +31,11 @@ The app does not connect to GitHub, Slack, or other project systems automaticall
 
 ## Synthetic judge pack and safe source intake
 
-Open Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf for the judge-readable source bundle, or use the DOCX/Markdown copy to inspect and reuse the synthetic examples. The Gmail- and WhatsApp-style exports are fictional examples; the product does not connect to either service. The pack describes the supported claims, known gaps, and a suggested independent walkthrough.
+Open Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf for the judge-readable source bundle, or use the DOCX/Markdown copy to inspect the synthetic examples. The Gmail- and WhatsApp-style exports are fictional; the product does not connect to either service.
 
-Uploads are limited to an allowlist, one file per request, 10 MB, and bounded extraction. PDFs are checked for a valid header, active-content markers and page/text limits. DOCX ZIP expansion, entry count, compression ratio, embedded payload paths, and archive integrity are checked before parsing. Executables and archives are not supported. Obvious private keys, credential assignments, and the EICAR antivirus test string are rejected before source indexing. Files are parsed as data, never executed, and originals are delivered as attachments rather than rendered inline. Images require a user-written description; the image itself is not OCR/vision processed.
+Uploads are limited to an allowlist, one file per request, 10 MB, and bounded extraction. PDFs receive header, active-content, page, and text-size checks. DOCX ZIP expansion, entry count, compression ratio, embedded payload paths, and archive integrity are checked. Executables and archives are rejected. Obvious credentials and the EICAR antivirus test string are rejected from both uploaded files and pasted notes/answers. Originals download as attachments and are never executed. Images are stored as originals; contributors must add a searchable description, and image pixels are not OCR/vision processed.
 
-**Malware limitation:** no antivirus engine is configured in the Vercel demo. These defensive checks reduce common risks; they are not a malware scanner or a guarantee that every malicious file will be detected. The public demo must contain synthetic material only.
+**Malware and demo limits:** there is no antivirus engine. These checks reduce common risks; they do not prove a file is safe. The public demo intentionally has no login and uses shared synthetic role accounts. Server access checks limit those demo identities to explicitly assigned synthetic handovers and built-in templates; account/template administration and legacy Sitewise APIs are unavailable to demo users. Demo activity can change shared sample data, so never enter customer data, secrets, or other confidential information in the public demo.
 
 ## Technology and data flow
 
@@ -83,20 +83,21 @@ python -m pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
 ```
 
-The acceptance tests run in a temporary SQLite database and cover health/landing, the 14-field template, reviewer-created assignment, builder submission, recipient denial before publication, reviewer approval and publication, duplicate publication rejection, role-filtered recipient access, Q&A, acknowledgement, malformed JSON, invalid empty templates, unauthenticated access, idempotent mixed-source demo seeding, and upload rejection for executables, malformed documents, credential dumps, EICAR test data, and oversized files. The latest local run completed 4 tests successfully. This does not replace verification against the live Vercel and Supabase deployment.
+The current suite has 5 end-to-end/API acceptance tests. It covers the reviewer-builder-recipient workflow, authorization and recipient visibility, demo isolation from real users/custom templates/unassigned handovers, retired Sitewise endpoint denial, malformed and empty input, source secrecy checks, repeated demo seeding, mixed synthetic evidence, image descriptions, and rejection of executables, malformed documents, credential dumps, EICAR test data, and oversized uploads. The suite passed locally on 16 November 2026. This does not verify the live Vercel deployment or replace independent security review.
 
 ## Limitations and next steps
 
-- The judge demo intentionally bypasses login and grants synthetic role sessions. Keep it isolated to fictional demo data; do not use this mode for real confidential work.
-- Account setup is owner-managed; there is no email invitation or password-reset delivery service.
-- The role model is for a single workspace/project environment; organization-level tenant isolation, external security review, backup/restore drills, monitoring/alerting, and formal retention controls require further production operations work.
-- AI availability and output depend on the configured provider. The safe fallback is source excerpts; the reviewer remains accountable for publication.
+- Public demo sessions are shared, unauthenticated, and intended only for fictional judge data. Data entered by one demo visitor may be visible to other demo visitors. The demo role is scoped to explicitly assigned synthetic handovers, but this is not a tenant-isolation design for confidential customer work.
+- Account setup is owner-managed; there is no email invitation, password-reset delivery, or login rate limiter. The demo's shared sample state may be changed during judging.
+- The app has no antivirus engine, independent penetration test, formal data-retention controls, organization-level tenant system, backup/restore drills, or production monitoring/alerting.
+- The product does not automatically connect to GitHub, Slack, WhatsApp, or Gmail; authorized exports/files must be supplied by the user. Optional LLM calls send selected source text to the configured provider. The source-only fallback remains available without a provider key.
+- Citation checks establish traceability to supplied text, not that a claim is true, current, or complete. A human reviewer remains responsible for approval and sharing.
 
 ## Round 3 commitments
 
 1. **Better template — delivered:** expanded the software handover starter to 14 practical engineering sections with explicit proof, status, operational setup, risk, ownership, and continuation prompts.
 2. **Better hierarchy — delivered:** made the Senior reviewer / owner → Intern / builder → Incoming engineer workflow and permissions explicit across onboarding, workspaces, assignment, review, and recipient sharing.
-3. **Production-ready system — Round 3 hardening delivered:** persistent hosted database support, server-enforced role/access checks, safe citation filtering, secure session-cookie behavior, malformed-input responses, template validation, concurrent first-owner setup protection, duplicate-publish rejection, and end-to-end workflow tests. A hackathon build is not a substitute for an independently audited production service; remaining operational limits are listed above.
+3. **Production-readiness hardening — Round 3 work delivered; operational readiness remains:** persistent hosted database support, server-enforced role/access checks, demo data scoping, legacy API shutdown, source credential checks, upload bounds, safe citation filtering, secure session-cookie behavior, malformed-input responses, template validation, concurrent first-owner setup protection, duplicate-publish rejection, and end-to-end workflow tests. Login throttling, antivirus, independent security review, formal tenant isolation, backups, and monitoring are not implemented; this is a hackathon MVP, not a claim of production certification.
 
 ## Submission details
 
