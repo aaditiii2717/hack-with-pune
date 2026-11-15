@@ -10,13 +10,13 @@
 </head>
 <body><main class="page">
 <a class="brand" href="/"><span class="mark">K</span> KNOWLEDGE CONTINUITY</a>
-<section class="hero"><div class="eyebrow">Interactive product demo</div><h1>See the handoff from each side.</h1><p>Choose a role to open the same fictional software project. No account or password is needed. Start as the reviewer to inspect the handoff, ask the intern for missing setup details, then publish it for the next engineer.</p></section>
+<section class="hero"><div class="eyebrow">Interactive product demo</div><h1>See the handoff from each side.</h1><p>Follow the same fictional handover through three roles. Start with the intern to inspect the sample resources and answer the reviewer question; switch to the senior reviewer to check citations and publish; finish as the incoming engineer. No account or password is needed.</p></section>
 <section class="roles" aria-label="Choose a demo role">
-<article class="role"><small>01 / Review & approve</small><h2>Senior reviewer</h2><p>Inspect source-backed fields, review gaps, approve the handoff, and control what is shared.</p><button onclick="enter('admin')">Open reviewer workspace ↗</button></article>
-<article class="role"><small>02 / Add project context</small><h2>Intern / builder</h2><p>Add notes or project files, update the draft, and answer the senior's follow-up questions.</p><button onclick="enter('employee')">Open intern workspace ↗</button></article>
-<article class="role"><small>03 / Continue the work</small><h2>Incoming engineer</h2><p>Read approved sections, inspect dated evidence, acknowledge receipt, and ask sourced questions.</p><button onclick="enter('recipient')">Open engineer workspace ↗</button></article>
+<article class="role"><small>02 / Review & approve</small><h2>Senior reviewer</h2><p>Step 2 · Verify citations, approve only supported fields, choose what the engineer can see, then publish.</p><button onclick="enter('admin')">Open reviewer workspace ↗</button></article>
+<article class="role"><small>01 / Add project context</small><h2>Intern / builder</h2><p>Step 1 · Review the sample README, chat, email, issues, tests, and FAQ. Answer the release question or leave it unresolved, then submit.</p><button onclick="enter('employee')">Open intern workspace ↗</button></article>
+<article class="role"><small>03 / Continue the work</small><h2>Incoming engineer</h2><p>Step 3 · Read the approved next steps, inspect cited evidence, ask a sourced question, and acknowledge receipt.</p><button onclick="enter('recipient')">Open engineer workspace ↗</button></article>
 </section>
-<div class="note"><b>Demo data only.</b> The Human Value Calculator project and its dated notes are fictional. This workspace is intended for judging and product exploration, not confidential information.</div><div class="error" id="error" role="status"></div>
+<div class="note"><b>Demo data only.</b> The Human Value Calculator and all sample messages are fictional. Sources include a README, chat export, Gmail-style email, issues CSV, test log, and FAQ. The public demo is for synthetic data only.</div><div class="error" id="error" role="status"></div>
 <p style="margin-top:20px;font-size:10px;color:#797479">Already part of a workspace? <a href="/login" style="color:#7c0919">Sign in</a></p>
 </main><script>
 async function enter(role){const error=document.getElementById('error');error.textContent='Opening the demo workspace...';try{const r=await fetch('/api/kc/demo/session',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({role})});const d=await r.json();if(!r.ok)throw Error(d.detail||'Demo access is not enabled on this deployment');location.href=d.next}catch(e){error.textContent=e.message}}

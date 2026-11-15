@@ -1497,6 +1497,11 @@ def landing_page() -> FileResponse:
     return FileResponse(BASE / "landing.html")
 
 
+@app.get("/guided-ui.js", include_in_schema=False)
+def guided_ui_script() -> FileResponse:
+    return FileResponse(BASE / "guided-ui.js", media_type="text/javascript")
+
+
 @app.get("/app", include_in_schema=False)
 def application_page(request: Request):
     user=session_user(request.cookies.get("kc_session"))
