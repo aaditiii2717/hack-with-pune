@@ -19,7 +19,8 @@ The editable-copy starter prompts for 14 areas: user outcome and acceptance crit
 
 - Landing page, demo entry point, and distinct owner, builder, and incoming-engineer workspaces.
 - Account and role setup, assigned handovers, default/custom editable templates, and field-level editing.
-- TXT, Markdown, CSV, JSON, LOG, HTML, CSS, JavaScript/TypeScript, Python, SQL, YAML, PDF, and DOCX source intake (up to 10 MB per file).
+- TXT, Markdown, CSV, JSON, LOG, HTML, CSS, JavaScript/TypeScript, Python, SQL, YAML, PDF, DOCX, PNG, JPEG, GIF, and WebP source intake (up to 10 MB per file).
+- Image originals are stored privately; the uploader must provide a short description that becomes searchable and citable. Image pixels are not OCR- or vision-analyzed. The incoming engineer sees approved descriptions in the handover, not the private original image file.
 - Passage-based source indexing, structured AI-assisted extraction when a provider key is configured, server-side citation ID and exact-quote validation, and a local source-matching fallback.
 - Found/inferred/missing or manual field states, focused questions for missing context, reviewer approval, recipient visibility controls, versioned publication, and acknowledgement.
 - Recipient Q&A constrained to the approved handover source set, source-linked project timeline, and an activity trail.

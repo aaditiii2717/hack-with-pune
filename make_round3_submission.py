@@ -65,7 +65,7 @@ doc.add_heading('Completed capabilities', level=1)
 for item in [
     'Distinct landing, reviewer, builder, and incoming-engineer experiences; synthetic Human Value Calculator demo.',
     'Default and owner-customized templates; assigned handovers; field editing, status, and focused missing-context questions.',
-    'TXT, Markdown, CSV, JSON, LOG, web/code text formats, PDF, and DOCX intake (10 MB per file).',
+    'TXT, Markdown, CSV, JSON, LOG, web/code text formats, PDF, DOCX, PNG, JPEG, GIF, and WebP intake (10 MB per file). Images are stored privately; a contributor description is indexed and cited. No OCR/vision is claimed.',
     'Stable source passage IDs, structured AI-assisted extraction when configured, citation checks, and local source-matching fallback.',
     'Human approval, field-level visibility, versioned publication, recipient Q&A over approved sources, timeline, and acknowledgement.',
     'PostgreSQL persistence for source text and originals; SQLite local development.',

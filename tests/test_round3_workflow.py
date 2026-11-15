@@ -41,6 +41,7 @@ class HandoverJourneyTests(unittest.TestCase):
     def test_reviewer_intern_recipient_journey_and_permissions(self) -> None:
         self.assertEqual(self.client.get("/api/health").json()["status"], "ok")
         self.assertIn("Knowledge Continuity", self.client.get("/").text)
+        self.assertIn("png", self.client.get("/api/kc/capabilities").json()["uploads"])
 
         self.demo_login("admin")
         templates = self.client.get("/api/kc/templates").json()
@@ -69,6 +70,20 @@ class HandoverJourneyTests(unittest.TestCase):
             "added_by": "Demo Intern",
         })
         self.assertEqual(source.status_code, 200, source.text)
+        image = self.client.post(
+            f"/api/kc/handovers/{handover_id}/upload",
+            data={"description": "A marked-up architecture diagram showing the API boundary."},
+            files={"file": ("architecture.png", b"\x89PNG\r\n\x1a\nsynthetic", "image/png")},
+        )
+        self.assertEqual(image.status_code, 200, image.text)
+        image_detail = self.client.get(f"/api/kc/handovers/{handover_id}").json()
+        image_source = next(source for source in image_detail["sources"] if source["id"] == image.json()["id"])
+        self.assertEqual(image_source["source_type"], "png")
+        missing_description = self.client.post(
+            f"/api/kc/handovers/{handover_id}/upload",
+            files={"file": ("architecture.png", b"\x89PNG\r\n\x1a\nsynthetic", "image/png")},
+        )
+        self.assertEqual(missing_description.status_code, 422)
         self.assertEqual(self.client.post(f"/api/kc/handovers/{handover_id}/submit").json()["status"], "Submitted")
         self.demo_login("recipient")
         self.assertEqual(self.client.get(f"/api/kc/handovers/{handover_id}/recipient").status_code, 403)

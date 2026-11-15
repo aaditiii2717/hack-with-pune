@@ -685,7 +685,7 @@ def dated_source_events(passage: dict[str, Any]) -> list[dict[str, str]]:
 @app.get("/api/kc/capabilities")
 def kc_capabilities() -> dict[str, Any]:
     key,_,model=llm_config()
-    return {"model_configured": bool(key), "model_state":"fallback after provider error" if MODEL_LAST_ERROR else ("configured" if key else "source-only"), "model": model, "uploads": ["txt", "md", "csv", "json", "log", "html", "css", "js", "jsx", "ts", "tsx", "py", "sql", "yaml", "yml", "pdf", "docx"], "max_upload_bytes": 10 * 1024 * 1024}
+    return {"model_configured": bool(key), "model_state":"fallback after provider error" if MODEL_LAST_ERROR else ("configured" if key else "source-only"), "model": model, "uploads": ["txt", "md", "csv", "json", "log", "html", "css", "js", "jsx", "ts", "tsx", "py", "sql", "yaml", "yml", "pdf", "docx", "png", "jpg", "jpeg", "gif", "webp"], "max_upload_bytes": 10 * 1024 * 1024}
 
 
 def start_session(db: sqlite3.Connection, response, user_id: str, request: Request | None = None) -> None:
@@ -958,9 +958,13 @@ async def kc_upload_source(handover_id: str, request: Request) -> dict[str, Any]
     from email.policy import default
     try:
         msg=BytesParser(policy=default).parsebytes((f"Content-Type: {ctype}\r\nMIME-Version: 1.0\r\n\r\n").encode()+body)
-        part=next(p for p in msg.iter_parts() if p.get_param("name",header="content-disposition")=="file")
+        parts=list(msg.iter_parts())
+        part=next(p for p in parts if p.get_param("name",header="content-disposition")=="file")
+        description_part=next((p for p in parts if p.get_param("name",header="content-disposition")=="description"),None)
+        image_description=(description_part.get_payload(decode=True) or b"").decode("utf-8","replace").strip() if description_part else ""
         filename=Path(part.get_filename() or "resource.txt").name; raw=part.get_payload(decode=True) or b""
     except Exception as exc: raise HTTPException(400,"Could not read uploaded file") from exc
+    if len(raw)>10*1024*1024: raise HTTPException(413,"File exceeds the 10 MB limit")
     suffix=Path(filename).suffix.lower()
     try:
         if suffix in (".txt",".md",".csv",".json",".log",".html",".css",".js",".jsx",".ts",".tsx",".py",".sql",".yaml",".yml"): text=raw.decode("utf-8-sig")
@@ -972,7 +976,14 @@ async def kc_upload_source(handover_id: str, request: Request) -> dict[str, Any]
             from docx import Document
             import io
             doc=Document(io.BytesIO(raw)); text="\n\n".join(p.text for p in doc.paragraphs if p.text.strip())
-        else: raise HTTPException(415,"Supported sources: TXT, MD, CSV, JSON, LOG, HTML, CSS, JS, JSX, TS, TSX, PY, SQL, YAML, YML, PDF, DOCX. Never upload .env files or secret values.")
+        elif suffix in (".png", ".jpg", ".jpeg", ".gif", ".webp"):
+            signatures={".png":raw.startswith(b"\x89PNG\r\n\x1a\n"),".jpg":raw.startswith(b"\xff\xd8\xff"),".jpeg":raw.startswith(b"\xff\xd8\xff"),".gif":raw.startswith((b"GIF87a",b"GIF89a")),".webp":len(raw)>=12 and raw[:4]==b"RIFF" and raw[8:12]==b"WEBP"}
+            if not signatures[suffix]: raise HTTPException(415,"The file contents do not match the selected image format")
+            description=image_description
+            if not description: raise HTTPException(422,"Add a short description for this image so it can be searched and cited")
+            if len(description)>3000: raise HTTPException(422,"Image description must be 3,000 characters or fewer")
+            text="Contributor description of image "+filename+": "+description
+        else: raise HTTPException(415,"Supported sources: TXT, MD, CSV, JSON, LOG, HTML, CSS, JS, JSX, TS, TSX, PY, SQL, YAML, YML, PDF, DOCX, PNG, JPG, JPEG, GIF, WEBP. Add a description to each image. Never upload .env files or secret values.")
     except ImportError as exc: raise HTTPException(503,"Install document parsers from requirements.txt to read PDF and DOCX") from exc
     if not text.strip(): raise HTTPException(422,"No readable text found in this resource")
     data={"name":filename,"source_type":suffix.lstrip("."),"content":text,"added_by":request.headers.get("x-user-name","Departing teammate"),"_upload_raw":raw,"_upload_content_type":part.get_content_type() or "application/octet-stream"}
