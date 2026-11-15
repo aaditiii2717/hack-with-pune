@@ -1,16 +1,9 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "server.py",
-      "use": "@vercel/python"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "server.py": {
+      "includeFiles": "*.html",
+      "maxDuration": 60
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "server.py"
-    }
-  ]
+  }
 }
-

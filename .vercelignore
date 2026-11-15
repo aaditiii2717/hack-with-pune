@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+data/
+.git/
+.vercel/
+.vercel-cache-local/
+__pycache__/
+*.py[cod]
+.venv/
+tests/
+Knowledge_Continuity_Round1_Proposal.*
