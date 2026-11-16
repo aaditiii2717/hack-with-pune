@@ -1052,7 +1052,9 @@ def kc_templates(request: Request) -> list[dict[str, Any]]:
     user=require_roles(request,"admin")
     with connect() as db:
         if is_public_demo_user(user):
-            rows=db.execute("SELECT * FROM kc_templates WHERE is_default=1 ORDER BY is_default DESC,name")
+            # Keep starter templates protected, while allowing judges to create and
+            # reuse their own synthetic demo templates in the shared workspace.
+            rows=db.execute("SELECT * FROM kc_templates WHERE is_default=1 OR id LIKE 'demo-tpl-%' ORDER BY is_default DESC,name")
         else:
             rows=db.execute("SELECT * FROM kc_templates ORDER BY is_default DESC,name")
         return [{**dict(r), "fields": json.loads(r["fields_json"])} for r in rows]
@@ -1075,12 +1077,15 @@ def clean_template_fields(fields: Any) -> list[dict[str, Any]]:
 @app.post("/api/kc/templates")
 async def kc_create_template(request: Request) -> dict[str, Any]:
     user=require_roles(request,"admin")
-    if is_public_demo_user(user): raise HTTPException(403,"Template management is disabled in the public synthetic demo")
+    public_demo=is_public_demo_user(user)
     data = await request.json(); name = str(data.get("name", "")).strip(); fields = data.get("fields")
     if not name or len(name)>120: raise HTTPException(422,"Template name must be between 1 and 120 characters")
     clean=clean_template_fields(fields)
     with connect() as db:
-        tid="tpl_"+uuid.uuid4().hex[:12]; t=now()
+        if public_demo:
+            created=db.execute("SELECT COUNT(*) AS n FROM kc_templates WHERE id LIKE 'demo-tpl-%'").fetchone()["n"]
+            if created>=25: raise HTTPException(429,"This shared demo has reached its custom-template limit")
+        tid=("demo-tpl-" if public_demo else "tpl_")+uuid.uuid4().hex[:12]; t=now()
         db.execute("INSERT INTO kc_templates VALUES(?,?,?,?,?,?,?,?)",(tid,name,str(data.get("description",""))[:500],str(data.get("category","Custom"))[:80],0,json.dumps(clean),t,t))
         return {"id":tid,"name":name,"description":str(data.get("description","")),"category":data.get("category","Custom"),"is_default":0,"fields":clean,"created_at":t,"updated_at":t}
 
@@ -1088,11 +1093,13 @@ async def kc_create_template(request: Request) -> dict[str, Any]:
 @app.put("/api/kc/templates/{template_id}")
 async def kc_update_template(template_id: str, request: Request) -> dict[str, Any]:
     user=require_roles(request,"admin")
-    if is_public_demo_user(user): raise HTTPException(403,"Template management is disabled in the public synthetic demo")
+    public_demo=is_public_demo_user(user)
     data=await request.json()
     with connect() as db:
         old=db.execute("SELECT * FROM kc_templates WHERE id=?",(template_id,)).fetchone()
         if not old: raise HTTPException(404,"Template not found")
+        if public_demo and not template_id.startswith("demo-tpl-"):
+            raise HTTPException(403,"Starter templates are protected; customize one to create an editable copy")
         if old["is_default"]: raise HTTPException(409,"Save a copy of a default template before editing it")
         name=str(data.get("name",old["name"])).strip(); fields=data.get("fields",json.loads(old["fields_json"]))
         if not name or len(name)>120: raise HTTPException(422,"Template name must be between 1 and 120 characters")
