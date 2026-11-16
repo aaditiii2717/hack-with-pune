@@ -70,7 +70,7 @@ The project owner reported that the Vercel deployment error was cleared. The tea
 
 1. Push the public source repository and import it into Vercel. Keep the repository root as the root directory and use the FastAPI preset / `vercel.json` configuration.
 2. Configure a Supabase PostgreSQL project and copy its **Transaction pooler** connection URI. Add it in Vercel → Project → Settings → Environment Variables as `DATABASE_URL`.
-3. Add `KC_DEMO_MODE=1` and `COOKIE_SECURE=1` for the synthetic judging deployment. Add `GROQ_API_KEY` only if live AI extraction is enabled. Do not add `NEXT_PUBLIC_*` database credentials or a service-role key to this server app.
+3. Add `KC_DEMO_MODE=1` and `COOKIE_SECURE=1` for the synthetic judging deployment. Set a unique random `KC_RATE_LIMIT_KEY` for stable hashed login-limit identifiers; if omitted, the server derives it from `DATABASE_URL`. Add `GROQ_API_KEY` only if live AI extraction is enabled. Do not add `NEXT_PUBLIC_*` database credentials or a service-role key to this server app.
 4. Apply variables to Production (and Preview if used), redeploy, then open `/api/health` and `/demo` on the deployed domain.
 5. Verify in a private browser window: owner/reviewer, builder, and recipient flow; refresh; source citations; publication; and recipient visibility.
 
@@ -83,12 +83,18 @@ python -m pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
 ```
 
-The current suite has 5 end-to-end/API acceptance tests. It covers the reviewer-builder-recipient workflow, authorization and recipient visibility, demo isolation from real users/custom templates/unassigned handovers, retired Sitewise endpoint denial, malformed and empty input, source secrecy checks, repeated demo seeding, mixed synthetic evidence, image descriptions, and rejection of executables, malformed documents, credential dumps, EICAR test data, and oversized uploads. The suite passed locally on 16 November 2026. This does not verify the live Vercel deployment or replace independent security review.
+The current suite has 9 tests: 6 end-to-end/API acceptance tests and 3 offline backup-tool safety tests. It covers the reviewer-builder-recipient workflow, authorization and recipient visibility, demo isolation from real users/custom templates/unassigned handovers, retired Sitewise endpoint denial, malformed input, source secrecy checks, demo seeding, upload rejection, persistent login throttling, refusal to use the transaction pooler for dumps, and refusal to restore to the configured production Supabase project. The suite passed locally on 16 November 2026. It does not verify a live Vercel deployment, contact a real Supabase database, or replace an independent security review.
+
+## Login throttling and database backups
+
+Password login stores failed-attempt counters in PostgreSQL/SQLite, keyed by HMAC digests rather than raw email/IP values. The current limits are 8 failed attempts per account and 40 per client IP in a 15-minute window; the public demo role-session endpoint is separately limited to 60 sessions per IP per window. A correct login clears the account counter. Set a unique random `KC_RATE_LIMIT_KEY` in Vercel for stable HMAC identifiers, or leave it blank to derive the key from `DATABASE_URL`. The public judge demo is still a role-selector demo and does not use passwords.
+
+`python backup_database.py` creates a compressed PostgreSQL dump in the ignored `backups/` folder. Install PostgreSQL client tools first and set `SUPABASE_BACKUP_URL` in your private `.env` to a Direct or Session connection URI; do not use the Vercel transaction-pooler URI. Backups contain project data, are not encrypted by the script, and must be kept in encrypted, access-controlled storage. `BACKUP_RESTORE.md` explains how to restore only into a separate empty staging project with `python restore_database.py <dump-file>` and verify the app journey. **The scripts and runbook are prepared, but no live backup/restore drill has been run yet.** Supabase documents daily managed backups for Pro and higher plans; Free plans should export regularly and keep an off-site copy. See [Supabase backup guidance](https://supabase.com/docs/guides/platform/backups) and [connection guidance for dump/restore](https://supabase.com/docs/guides/database/connecting-to-postgres).
 
 ## Limitations and next steps
 
 - Public demo sessions are shared, unauthenticated, and intended only for fictional judge data. Data entered by one demo visitor may be visible to other demo visitors. The demo role is scoped to explicitly assigned synthetic handovers, but this is not a tenant-isolation design for confidential customer work.
-- Account setup is owner-managed; there is no email invitation, password-reset delivery, or login rate limiter. The demo's shared sample state may be changed during judging.
+- Account setup is owner-managed; there is no email invitation or password-reset delivery. Login throttling is a baseline control, not a substitute for a managed identity provider or independent abuse monitoring. The demo's shared sample state may be changed during judging.
 - The app has no antivirus engine, independent penetration test, formal data-retention controls, organization-level tenant system, backup/restore drills, or production monitoring/alerting.
 - The product does not automatically connect to GitHub, Slack, WhatsApp, or Gmail; authorized exports/files must be supplied by the user. Optional LLM calls send selected source text to the configured provider. The source-only fallback remains available without a provider key.
 - Citation checks establish traceability to supplied text, not that a claim is true, current, or complete. A human reviewer remains responsible for approval and sharing.
@@ -97,7 +103,7 @@ The current suite has 5 end-to-end/API acceptance tests. It covers the reviewer-
 
 1. **Better template — delivered:** expanded the software handover starter to 14 practical engineering sections with explicit proof, status, operational setup, risk, ownership, and continuation prompts.
 2. **Better hierarchy — delivered:** made the Senior reviewer / owner → Intern / builder → Incoming engineer workflow and permissions explicit across onboarding, workspaces, assignment, review, and recipient sharing.
-3. **Production-readiness hardening — Round 3 work delivered; operational readiness remains:** persistent hosted database support, server-enforced role/access checks, demo data scoping, legacy API shutdown, source credential checks, upload bounds, safe citation filtering, secure session-cookie behavior, malformed-input responses, template validation, concurrent first-owner setup protection, duplicate-publish rejection, and end-to-end workflow tests. Login throttling, antivirus, independent security review, formal tenant isolation, backups, and monitoring are not implemented; this is a hackathon MVP, not a claim of production certification.
+3. **Production-readiness hardening — Round 3 work delivered; operational readiness remains:** persistent hosted database support, server-enforced role/access checks, demo data scoping, legacy API shutdown, source credential checks, upload bounds, login throttling, backup/restore scripts and runbook, safe citation filtering, secure session-cookie behavior, malformed-input responses, template validation, duplicate-publish rejection, and end-to-end workflow tests. The live restore drill, antivirus, independent security review, formal tenant isolation, and monitoring are outstanding; this is a hackathon MVP, not a claim of production certification.
 
 ## Submission details
 

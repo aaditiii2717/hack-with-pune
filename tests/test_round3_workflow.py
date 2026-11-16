@@ -128,6 +128,26 @@ class HandoverJourneyTests(unittest.TestCase):
         secret_note = self.client.post("/api/kc/handovers/demo-software-handover/sources", json={"name":"Secrets","content":"password=ThisIsASecretCredential123"})
         self.assertEqual(secret_note.status_code, 422)
 
+    def test_login_throttle_limits_repeated_bad_passwords_and_resets_after_window(self) -> None:
+        email="throttle@example.test"
+        password="a sufficiently long test password"
+        with server.connect() as db:
+            db.execute("INSERT INTO kc_users VALUES(?,?,?,?,?,?,?)",("usr_throttle",email,"Throttle Test","admin",server.password_hash(password),1,server.now()))
+        for _ in range(server.LOGIN_EMAIL_MAX_ATTEMPTS):
+            response=self.client.post("/api/kc/auth/login",json={"email":email,"password":"wrong"})
+            self.assertEqual(response.status_code,401,response.text)
+        limited=self.client.post("/api/kc/auth/login",json={"email":email,"password":password})
+        self.assertEqual(limited.status_code,429,limited.text)
+        self.assertIn("Retry-After",limited.headers)
+        with server.connect() as db:
+            class NoClient:
+                client=None
+                headers={}
+            bucket,_=server.login_rate_keys(NoClient(), email)
+            db.execute("UPDATE kc_login_limits SET window_started_at=? WHERE bucket_key=?",("2000-01-01T00:00:00+00:00",bucket))
+        recovered=self.client.post("/api/kc/auth/login",json={"email":email,"password":password})
+        self.assertEqual(recovered.status_code,200,recovered.text)
+
     def test_public_demo_is_limited_to_synthetic_accounts_templates_and_handovers(self) -> None:
         # A real workspace may share this hosted database; the public demo identity
         # must not gain access to its users, custom templates, or handover records.

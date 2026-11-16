@@ -7,7 +7,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
 endobj
 3 0 obj
-<< /Length 5001 >>
+<< /Length 5019 >>
 stream
 BT
 0.16 0.19 0.23 rg
@@ -93,13 +93,13 @@ BT
 1 0 0 1 52 367 Tm (retired API shutdown; source credential checks; citation ID/quote validation; recipient filtering; malformed-input) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 354 Tm (handling; duplicate-publication rejection; and end-to-end role-journey acceptance tests. Login throttling, antivirus,) Tj
+1 0 0 1 52 354 Tm (handling; persistent login throttling; backup/restore scripts and runbook; and end-to-end role-journey tests. The live) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 341 Tm (independent security review, formal tenant isolation, backups, and monitoring remain outstanding; this is a hackathon MVP,) Tj
+1 0 0 1 52 341 Tm (restore drill, antivirus, independent security review, formal tenant isolation, and monitoring remain outstanding; this is) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 328 Tm (not a production certification.) Tj
+1 0 0 1 52 328 Tm (a hackathon MVP, not a production certification.) Tj
 0.05 0.45 0.42 rg
 /F2 16 Tf
 1 0 0 1 52 315 Tm (Completed capabilities) Tj
@@ -128,7 +128,7 @@ endobj
 << /Type /Page /Parent 9 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
 endobj
 5 0 obj
-<< /Length 5562 >>
+<< /Length 5387 >>
 stream
 BT
 0.16 0.19 0.23 rg
@@ -184,58 +184,58 @@ BT
 1 0 0 1 52 531 Tm (Verification) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 509 Tm (Local acceptance command: python -m unittest discover -s tests -v. The latest local run passed 5 tests on 16 November) Tj
+1 0 0 1 52 509 Tm (Local command: python -m unittest discover -s tests -v. The latest run passed 9 tests on 16 November 2026: 6 isolated) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 496 Tm (2026. Coverage includes health and landing, the 14-field starter, reviewer assignment, builder submission, recipient) Tj
+1 0 0 1 52 496 Tm (SQLite workflow/API acceptance tests plus 3 offline backup-tool safety tests. Coverage includes role access, publication) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 483 Tm (denial before publication, field approval, publication, duplicate publish rejection, recipient filtering, Q&A,) Tj
+1 0 0 1 52 483 Tm (and recipient visibility, demo isolation, malformed input, source checks, upload rejection, persistent login throttling,) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 470 Tm (acknowledgement, unauthenticated access, malformed JSON, invalid empty templates, idempotent mixed-source demo seeding,) Tj
+1 0 0 1 52 470 Tm (transaction-pooler backup rejection, and refusal to restore to the same Supabase project. No live PostgreSQL or Vercel) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 457 Tm (demo isolation from real accounts/templates/unassigned handovers, retired Sitewise API denial, source credential) Tj
+1 0 0 1 52 457 Tm (request is exercised.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 444 Tm (rejection, and rejection of executable, malformed, credential-containing, EICAR test, and oversized uploads. The test) Tj
+1 0 0 1 52 444 Tm (The public demo uses shared synthetic role sessions and sample state can be changed by visitors. Never enter customer data) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 431 Tm (suite uses isolated temporary SQLite and synthetic data.) Tj
+1 0 0 1 52 431 Tm (or secrets. Login throttling uses persistent per-account and per-IP counters. Backup and restore scripts plus a) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 418 Tm (The public demo uses shared synthetic role sessions and sample state can be changed by visitors. Demo identities are) Tj
+1 0 0 1 52 418 Tm (staging-only runbook are included, but no live backup/restore drill has been run. There is no antivirus engine,) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 405 Tm (restricted to explicitly assigned synthetic handovers and built-in templates; account/template administration and retired) Tj
+1 0 0 1 52 405 Tm (independent security review, formal tenant isolation, or monitoring. Upload checks do not guarantee malware detection;) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 392 Tm (Sitewise APIs are disabled. Never enter customer data or secrets. There is no antivirus engine, login rate limiter,) Tj
-0.16 0.19 0.23 rg
-/F1 9 Tf
-1 0 0 1 52 379 Tm (independent security review, formal tenant isolation, backup/restore drill, or monitoring. Upload checks reduce common) Tj
-0.16 0.19 0.23 rg
-/F1 9 Tf
-1 0 0 1 52 366 Tm (risks but do not guarantee malware detection; citation checks prove traceability, not truth.) Tj
+1 0 0 1 52 392 Tm (citation checks prove traceability, not truth.) Tj
 0.05 0.45 0.42 rg
 /F2 16 Tf
-1 0 0 1 52 353 Tm (Setup and submission links) Tj
+1 0 0 1 52 379 Tm (Setup and submission links) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 331 Tm (Repository: https://github.com/aaditiii2717/hack-with-pune) Tj
+1 0 0 1 52 357 Tm (Repository: https://github.com/aaditiii2717/hack-with-pune) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 318 Tm (Current production domain shown in Vercel: https://knowledge-continuity-mu.vercel.app \(open and verify the live workflow) Tj
+1 0 0 1 52 344 Tm (Current production domain shown in Vercel: https://knowledge-continuity-mu.vercel.app \(open and verify the live workflow) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 305 Tm (before submitting\).) Tj
+1 0 0 1 52 331 Tm (before submitting\).) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 292 Tm (Judge evidence pack: Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf; editable copy:) Tj
+1 0 0 1 52 318 Tm (Judge evidence pack: Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.pdf; editable copy:) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 279 Tm (Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.docx.) Tj
+1 0 0 1 52 305 Tm (Knowledge_Continuity_Judge_Synthetic_Evidence_Pack.docx.) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 292 Tm (Backup and restore runbook: BACKUP_RESTORE.md. Backups contain sensitive project data and must be encrypted outside the) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 279 Tm (repository.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
 1 0 0 1 52 266 Tm (Local: create a Python virtual environment, install requirements.txt, copy .env.example to .env, then run python -m) Tj
@@ -258,7 +258,7 @@ endobj
 << /Type /Page /Parent 9 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
 endobj
 7 0 obj
-<< /Length 825 >>
+<< /Length 839 >>
 stream
 BT
 0.16 0.19 0.23 rg
@@ -266,16 +266,16 @@ BT
 1 0 0 1 52 748 Tm (The demo bypasses login and must contain synthetic data only. Account provisioning is owner-managed; there is no email) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 735 Tm (invite/password-reset service or automatic GitHub/Slack connector. Organization-level tenant isolation, independent) Tj
+1 0 0 1 52 735 Tm (invite/password-reset service or automatic GitHub/Slack connector. Organization-level tenant isolation, antivirus,) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 722 Tm (security audit, backup/restore drills, production monitoring, and formal retention controls remain future operational) Tj
+1 0 0 1 52 722 Tm (independent security audit, the live backup/restore drill, production monitoring, and formal retention controls remain) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 709 Tm (work. The next development phase should prioritize secure invitations and account recovery, integration-backed source) Tj
+1 0 0 1 52 709 Tm (future operational work. The next development phase should prioritize secure invitations and account recovery,) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 696 Tm (sync, stronger organization and retention controls, and operational monitoring/restore validation.) Tj
+1 0 0 1 52 696 Tm (integration-backed source sync, stronger organization and retention controls, and completing an observed restore drill.) Tj
 ET
 endstream
 endobj
@@ -294,15 +294,15 @@ xref
 0000000015 00000 n 
 0000000085 00000 n 
 0000000160 00000 n 
-0000005213 00000 n 
-0000005349 00000 n 
-0000010963 00000 n 
-0000011099 00000 n 
-0000011975 00000 n 
-0000012111 00000 n 
-0000012180 00000 n 
+0000005231 00000 n 
+0000005367 00000 n 
+0000010806 00000 n 
+0000010942 00000 n 
+0000011832 00000 n 
+0000011968 00000 n 
+0000012037 00000 n 
 trailer
 << /Size 11 /Root 10 0 R >>
 startxref
-12230
+12087
 %%EOF

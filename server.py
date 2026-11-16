@@ -39,6 +39,9 @@ MODEL_LAST_ERROR = False
 DEMO_ADMIN_ID = "demo_admin"
 DEMO_USER_IDS = ("demo_admin", "demo_intern", "demo_engineer")
 LEGACY_SITEWISE_API = ("/api/projects", "/api/changes", "/api/files")
+LOGIN_WINDOW_SECONDS = 900
+LOGIN_EMAIL_MAX_ATTEMPTS = 8
+LOGIN_IP_MAX_ATTEMPTS = 40
 
 
 @app.exception_handler(json.JSONDecodeError)
@@ -193,6 +196,7 @@ def init_db() -> None:
         CREATE TABLE IF NOT EXISTS kc_users(id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('admin','employee','recipient')), password_hash TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS kc_sessions(token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES kc_users(id) ON DELETE CASCADE, expires_at TEXT NOT NULL, created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS kc_handover_access(handover_id TEXT NOT NULL REFERENCES kc_handovers(id) ON DELETE CASCADE, user_id TEXT NOT NULL REFERENCES kc_users(id) ON DELETE CASCADE, role TEXT NOT NULL, PRIMARY KEY(handover_id,user_id));
+        CREATE TABLE IF NOT EXISTS kc_login_limits(bucket_key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, window_started_at TEXT NOT NULL);
         """)
         if USE_POSTGRES:
             db.execute("ALTER TABLE kc_handovers ADD COLUMN IF NOT EXISTS acknowledged_at TEXT")
@@ -900,6 +904,44 @@ def start_session(db: sqlite3.Connection, response, user_id: str, request: Reque
     response.set_cookie("kc_session",token,max_age=12*60*60,httponly=True,samesite="lax",secure=secure,path="/")
 
 
+def login_rate_keys(request: Request, email: str) -> tuple[str, str | None]:
+    # HMAC prevents raw emails and IP addresses from being stored in the table.
+    pepper=os.environ.get("KC_RATE_LIMIT_KEY") or DATABASE_URL or "local-development-rate-limit-key"
+    def digest(scope: str, value: str) -> str:
+        return hmac.new(pepper.encode(),f"{scope}:{value}".encode(),hashlib.sha256).hexdigest()
+    email_key=digest("email",email.strip().lower()[:254])
+    # Vercel overwrites this header at its edge; locally, use the ASGI peer.
+    # Do not trust arbitrary X-Forwarded-For input from an untrusted proxy.
+    ip_header=request.headers.get("x-forwarded-for","").split(",",1)[0].strip()
+    ip=ip_header or (request.client.host if request.client else None)
+    return email_key,digest("ip",ip) if ip else None
+
+
+def check_login_rate_limit(db, bucket_key: str, max_attempts: int) -> int:
+    row=db.execute("SELECT attempts,window_started_at FROM kc_login_limits WHERE bucket_key=?",(bucket_key,)).fetchone()
+    if not row: return 0
+    started=datetime.fromisoformat(row["window_started_at"])
+    current=datetime.now(timezone.utc)
+    elapsed=(current-started).total_seconds()
+    if elapsed>=LOGIN_WINDOW_SECONDS:
+        db.execute("DELETE FROM kc_login_limits WHERE bucket_key=?",(bucket_key,))
+        return 0
+    if int(row["attempts"])>=max_attempts:
+        return max(1,int(LOGIN_WINDOW_SECONDS-elapsed))
+    return 0
+
+
+def record_login_failure(db, bucket_key: str) -> None:
+    current=datetime.now(timezone.utc)
+    stamp=current.isoformat(timespec="seconds")
+    cutoff=(current-timedelta(seconds=LOGIN_WINDOW_SECONDS)).isoformat(timespec="seconds")
+    db.execute("""INSERT INTO kc_login_limits(bucket_key,attempts,window_started_at) VALUES(?,1,?)
+        ON CONFLICT(bucket_key) DO UPDATE SET
+        attempts=CASE WHEN kc_login_limits.window_started_at<? THEN 1 ELSE kc_login_limits.attempts+1 END,
+        window_started_at=CASE WHEN kc_login_limits.window_started_at<? THEN ? ELSE kc_login_limits.window_started_at END""",
+        (bucket_key,stamp,cutoff,cutoff,stamp))
+
+
 @app.get("/api/kc/auth/status")
 def kc_auth_status() -> dict[str, Any]:
     with connect() as db:
@@ -922,10 +964,28 @@ async def kc_auth_setup(request: Request):
 async def kc_auth_login(request: Request):
     data=await request.json(); email=str(data.get("email","")).strip().lower(); password=str(data.get("password",""))
     if len(email)>254 or len(password)>256: raise HTTPException(422,"Email or password exceeds the supported length")
+    email_bucket,ip_bucket=login_rate_keys(request,email)
+    retry_after=0
+    invalid_credentials=False
     with connect() as db:
-        user=db.execute("SELECT * FROM kc_users WHERE email=? AND active=1",(email,)).fetchone()
-        if not user or not password_matches(password,user["password_hash"]): raise HTTPException(401,"Email or password is incorrect")
-        response=JSONResponse({"user":{"id":user["id"],"email":user["email"],"display_name":user["display_name"],"role":user["role"]}}); start_session(db,response,user["id"],request); return response
+        db.execute("DELETE FROM kc_login_limits WHERE window_started_at<?",((datetime.now(timezone.utc)-timedelta(seconds=LOGIN_WINDOW_SECONDS)).isoformat(timespec="seconds"),))
+        retry_after=check_login_rate_limit(db,email_bucket,LOGIN_EMAIL_MAX_ATTEMPTS)
+        if ip_bucket:
+            retry_after=max(retry_after,check_login_rate_limit(db,ip_bucket,LOGIN_IP_MAX_ATTEMPTS))
+        if not retry_after:
+            user=db.execute("SELECT * FROM kc_users WHERE email=? AND active=1",(email,)).fetchone()
+            if not user or not password_matches(password,user["password_hash"]):
+                record_login_failure(db,email_bucket)
+                if ip_bucket: record_login_failure(db,ip_bucket)
+                invalid_credentials=True
+            else:
+                db.execute("DELETE FROM kc_login_limits WHERE bucket_key=?",(email_bucket,))
+                response=JSONResponse({"user":{"id":user["id"],"email":user["email"],"display_name":user["display_name"],"role":user["role"]}})
+                start_session(db,response,user["id"],request)
+    if retry_after:
+        raise HTTPException(429,"Too many unsuccessful sign-in attempts. Try again after the limit resets.",headers={"Retry-After":str(retry_after)})
+    if invalid_credentials: raise HTTPException(401,"Email or password is incorrect")
+    return response
 
 
 @app.post("/api/kc/demo/session")
@@ -935,6 +995,12 @@ async def kc_demo_session(request: Request):
     user_id={"admin":"demo_admin","employee":"demo_intern","recipient":"demo_engineer"}.get(role)
     if not user_id: raise HTTPException(422,"Choose a demo workspace")
     with connect() as db:
+        _,ip_bucket=login_rate_keys(request,"public-demo-session")
+        if ip_bucket:
+            db.execute("DELETE FROM kc_login_limits WHERE window_started_at<?",((datetime.now(timezone.utc)-timedelta(seconds=LOGIN_WINDOW_SECONDS)).isoformat(timespec="seconds"),))
+            retry_after=check_login_rate_limit(db,ip_bucket,60)
+            if retry_after: raise HTTPException(429,"Too many demo sessions. Wait for the limit to reset.",headers={"Retry-After":str(retry_after)})
+            record_login_failure(db,ip_bucket)
         user=db.execute("SELECT id,email,display_name,role FROM kc_users WHERE id=? AND active=1",(user_id,)).fetchone()
         if not user: raise HTTPException(503,"Demo workspace is not initialized")
         response=JSONResponse({"next":"/app" if role=="admin" else "/employee" if role=="employee" else "/recipient"})
