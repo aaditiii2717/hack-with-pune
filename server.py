@@ -255,20 +255,20 @@ def ensure_software_handover_template(db: sqlite3.Connection) -> None:
     """Make the intern-to-engineer template available in both new and existing workspaces."""
     t = now()
     fields = [
-        ("user_outcome", "User need & acceptance criteria", "Who uses this feature, what job it does, expected behavior, success criteria, and explicit non-goals.", True),
-        ("feature_scope", "Feature scope & boundaries", "List included behavior, excluded behavior, supported platforms, and assumptions. Separate current scope from future ideas.", True),
-        ("implementation_state", "Delivery status & proof", "For each requirement mark Working, Partial, Mocked, Planned, or Unknown. Link proof such as a route, screenshot, commit, test, or demo. Never call a mock production behavior.", True),
-        ("architecture", "Architecture & code map", "Trace the user action through UI, API, business logic, data store, and integrations. Name entry points, key files, and ownership boundaries.", True),
-        ("local_setup", "Reproducible setup & configuration", "Prerequisites and exact install, configuration, start, and test commands. Name required variables and safe example values; never include secrets.", True),
-        ("data_integrations", "Data model, APIs & integrations", "Describe important tables and fields, endpoint/request-response contracts, external services, fixtures, and fake or hard-coded data.", True),
-        ("calculations", "Core logic, formulas & assumptions", "For calculations or special behavior, explain inputs, units, formula, rounding, edge cases, assumptions, and where the logic lives.", False),
-        ("decisions", "Decisions, trade-offs & chronology", "Record what changed, when, who decided, why, alternatives considered, and whether a decision has been superseded.", True),
-        ("tests", "Test evidence & verified behavior", "Give exact commands and environment, expected versus actual results, linked evidence, date checked, and what remains untested.", True),
-        ("known_gaps", "Known defects, security & privacy risks", "Give reproduction steps, user impact, severity, mitigation, technical debt, data sensitivity, and behavior that must not be relied on.", True),
-        ("dependencies", "Ownership, dependencies & escalation", "Name the accountable owner for each open dependency, what must happen first, external services/teams, and who to contact when blocked.", True),
-        ("open_work", "Prioritized next work", "Rank next tasks. For each include owner, acceptance criteria, dependency, estimate or urgency, and the first actionable step.", True),
-        ("resources", "Canonical repository & references", "Link the repository and branch/commit, issue tracker, design, API docs, conversations, and source-of-truth documents. Say which is authoritative.", True),
-        ("first_build", "Incoming engineer first-day plan", "Give an ordered first-hour/day plan: clone, configure, run, verify one happy path, inspect open risks, then choose the next task.", True),
+        ("user_outcome", "01 · What are we building, and for whom?", "Name the user, the problem, expected behavior, how success is judged, and what is explicitly out of scope.", True),
+        ("implementation_state", "02 · What works today?", "Separate working, partial, mocked, planned, and unknown behavior. Give a test, route, screenshot, or commit as proof; never describe a mock as production behavior.", True),
+        ("local_setup", "03 · How do I run and verify it?", "List prerequisites and exact install, configure, start, and test commands. Name required environment-variable keys and safe example values only; never include secrets.", True),
+        ("open_work", "04 · What should I do next?", "Rank the next actions. For each give an owner or role, acceptance check, dependency, urgency, and the first concrete step.", True),
+        ("known_gaps", "05 · What could fail or should not be trusted?", "List known defects, security/privacy concerns, limitations, and technical debt. Explain impact, reproduction or warning signs, mitigation, and what must not be relied on.", True),
+        ("architecture", "System map · Where does the change live?", "Trace one important user action through UI, API, business logic, storage, and integrations. Point to entry files and explain component ownership boundaries.", False),
+        ("feature_scope", "Behavior & boundaries", "Describe included and excluded behavior, supported platforms, assumptions, and future ideas separately from committed scope.", False),
+        ("data_integrations", "Data, APIs & external services", "Describe relevant tables/fields, endpoint contracts, external services, fixtures, and any fake, hard-coded, or seeded data.", False),
+        ("decisions", "Decisions · What changed and why?", "For important decisions, include date, decision owner, rationale, trade-offs, and whether a later decision superseded it.", False),
+        ("tests", "Verification record", "Record commands and environment, expected versus actual result, date checked, evidence link, and what remains untested.", False),
+        ("dependencies", "People, services & blockers", "List dependencies, what must happen first, the accountable owner or team, and who to contact when blocked. Do not include credentials.", False),
+        ("resources", "Source-of-truth links", "Link the repository and branch/commit, issue tracker, design, API docs, and relevant discussions. Identify which link is authoritative.", False),
+        ("calculations", "Special logic & assumptions · if applicable", "For calculations or non-obvious behavior, state inputs and units, formula, rounding, edge cases, assumptions, and code location.", False),
+        ("first_build", "Incoming engineer · first hour", "Give a short ordered start: clone, configure, run, verify one happy path, inspect the highest-priority risk, then take the first next action.", False),
     ]
     payload = json.dumps([{"key":k,"label":label,"help":help_text,"required":required} for k,label,help_text,required in fields])
     existing = db.execute("SELECT fields_json FROM kc_templates WHERE id='software-project'").fetchone()
