@@ -9,7 +9,7 @@ Knowledge Continuity turns a departing teammate’s scattered project context in
 3. The **Senior reviewer / owner** checks evidence, edits content, controls recipient visibility field by field, approves fields, and publishes a version.
 4. The **Incoming engineer** sees only the assigned published handover and approved visible fields, can follow citations, ask a question, and acknowledge receipt.
 
-These are separate role-based workspaces over one API. The server enforces assignment, review and publication permissions; hiding a button in the browser is not the security boundary.
+These are separate role-based workspaces over one API. Each handover shows a live responsibility rail for setup, builder work, senior review, and recipient acknowledgement; its current, waiting, and complete states come from the saved handover status. The server enforces assignment, review and publication permissions; hiding a button in the browser is not the security boundary.
 
 ## Engineering starter template
 

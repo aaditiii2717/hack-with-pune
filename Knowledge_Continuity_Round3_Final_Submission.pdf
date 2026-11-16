@@ -7,7 +7,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
 endobj
 3 0 obj
-<< /Length 5019 >>
+<< /Length 5223 >>
 stream
 BT
 0.16 0.19 0.23 rg
@@ -78,49 +78,52 @@ BT
 1 0 0 1 52 432 Tm (2 Better hierarchy - delivered: The app makes the senior reviewer/owner to intern/builder to incoming engineer) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 419 Tm (responsibilities explicit. Assignment, submission, approval, publication, and recipient access are enforced by the API,) Tj
+1 0 0 1 52 419 Tm (responsibilities explicit. Every handover now displays a live responsibility rail for setup, builder work, review, and) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 406 Tm (including per-field recipient visibility.) Tj
+1 0 0 1 52 406 Tm (receipt; stage states are derived from saved workflow status. Assignment, submission, approval, publication, and recipient) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 393 Tm (3 Production-readiness hardening - Round 3 work delivered; operational readiness remains: Hosted PostgreSQL support for) Tj
+1 0 0 1 52 393 Tm (access are enforced by the API, including per-field recipient visibility.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 380 Tm (serverless deployment; secure session-cookie settings; server-side role and assignment checks; public-demo scoping;) Tj
+1 0 0 1 52 380 Tm (3 Production-readiness hardening - Round 3 work delivered; operational readiness remains: Hosted PostgreSQL support for) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 367 Tm (retired API shutdown; source credential checks; citation ID/quote validation; recipient filtering; malformed-input) Tj
+1 0 0 1 52 367 Tm (serverless deployment; secure session-cookie settings; server-side role and assignment checks; public-demo scoping;) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 354 Tm (handling; persistent login throttling; backup/restore scripts and runbook; and end-to-end role-journey tests. The live) Tj
+1 0 0 1 52 354 Tm (retired API shutdown; source credential checks; citation ID/quote validation; recipient filtering; malformed-input) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 341 Tm (restore drill, antivirus, independent security review, formal tenant isolation, and monitoring remain outstanding; this is) Tj
+1 0 0 1 52 341 Tm (handling; persistent login throttling; backup/restore scripts and runbook; and end-to-end role-journey tests. The live) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 328 Tm (a hackathon MVP, not a production certification.) Tj
+1 0 0 1 52 328 Tm (restore drill, antivirus, independent security review, formal tenant isolation, and monitoring remain outstanding; this is) Tj
+0.16 0.19 0.23 rg
+/F1 9 Tf
+1 0 0 1 52 315 Tm (a hackathon MVP, not a production certification.) Tj
 0.05 0.45 0.42 rg
 /F2 16 Tf
-1 0 0 1 52 315 Tm (Completed capabilities) Tj
+1 0 0 1 52 302 Tm (Completed capabilities) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 293 Tm (Distinct landing, reviewer, builder, and incoming-engineer experiences; synthetic Human Value Calculator demo.) Tj
+1 0 0 1 52 280 Tm (Distinct landing, reviewer, builder, and incoming-engineer experiences; synthetic Human Value Calculator demo.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 280 Tm (Default and owner-customized templates; assigned handovers; field editing, status, and focused missing-context questions.) Tj
+1 0 0 1 52 267 Tm (Default and owner-customized templates; assigned handovers; field editing, status, and focused missing-context questions.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 267 Tm (TXT, Markdown, CSV, JSON, LOG, web/code text formats, PDF, DOCX, PNG, JPEG, GIF, and WebP intake \(10 MB per file\). Images) Tj
+1 0 0 1 52 254 Tm (TXT, Markdown, CSV, JSON, LOG, web/code text formats, PDF, DOCX, PNG, JPEG, GIF, and WebP intake \(10 MB per file\). Images) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 254 Tm (are stored privately; a contributor description is indexed and cited. No OCR/vision is claimed.) Tj
+1 0 0 1 52 241 Tm (are stored privately; a contributor description is indexed and cited. No OCR/vision is claimed.) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 241 Tm (Stable source passage IDs, structured AI-assisted extraction when configured, citation checks, and local source-matching) Tj
+1 0 0 1 52 228 Tm (Stable source passage IDs, structured AI-assisted extraction when configured, citation checks, and local source-matching) Tj
 0.16 0.19 0.23 rg
 /F1 9 Tf
-1 0 0 1 52 228 Tm (fallback.) Tj
+1 0 0 1 52 215 Tm (fallback.) Tj
 ET
 endstream
 endobj
@@ -294,15 +297,15 @@ xref
 0000000015 00000 n 
 0000000085 00000 n 
 0000000160 00000 n 
-0000005231 00000 n 
-0000005367 00000 n 
-0000010806 00000 n 
-0000010942 00000 n 
-0000011832 00000 n 
-0000011968 00000 n 
-0000012037 00000 n 
+0000005435 00000 n 
+0000005571 00000 n 
+0000011010 00000 n 
+0000011146 00000 n 
+0000012036 00000 n 
+0000012172 00000 n 
+0000012241 00000 n 
 trailer
 << /Size 11 /Root 10 0 R >>
 startxref
-12087
+12291
 %%EOF
