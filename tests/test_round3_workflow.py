@@ -189,6 +189,23 @@ class HandoverJourneyTests(unittest.TestCase):
         self.assertTrue(public.json()["sources"])
         self.assertTrue(all(field["approved"] and field["citations"] for field in public.json()["fields"]))
 
+    def test_demo_login_repairs_missing_synthetic_evidence(self) -> None:
+        self.demo_login("employee")
+        source_id="demo-source-readme"
+        with server.connect() as db:
+            db.execute("DELETE FROM kc_passages WHERE source_id=?",(source_id,))
+            db.execute("DELETE FROM kc_sources WHERE id=?",(source_id,))
+
+        repaired=self.client.post("/api/kc/demo/session",json={"role":"employee"})
+        self.assertEqual(repaired.status_code,200,repaired.text)
+        detail=self.client.get("/api/kc/handovers/demo-software-handover")
+        self.assertEqual(detail.status_code,200,detail.text)
+        source=next((item for item in detail.json()["sources"] if item["id"]==source_id),None)
+        self.assertIsNotNone(source)
+        with server.connect() as db:
+            passages=db.execute("SELECT COUNT(*) n FROM kc_passages WHERE source_id=?",(source_id,)).fetchone()["n"]
+        self.assertGreater(passages,0)
+
     def test_upload_rejects_executables_bad_documents_and_credential_dumps(self) -> None:
         self.demo_login("employee")
         path="/api/kc/handovers/demo-software-handover/upload"

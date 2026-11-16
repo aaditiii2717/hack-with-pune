@@ -1003,6 +1003,10 @@ async def kc_demo_session(request: Request):
             retry_after=check_login_rate_limit(db,ip_bucket,60)
             if retry_after: raise HTTPException(429,"Too many demo sessions. Wait for the limit to reset.",headers={"Retry-After":str(retry_after)})
             record_login_failure(db,ip_bucket)
+        # The public judge workspace is synthetic and safe to seed idempotently.
+        # Repair it on entry so a stale/partially reset hosted database does not
+        # leave judges with an empty handover list or missing evidence pack.
+        ensure_demo_workspace(db)
         user=db.execute("SELECT id,email,display_name,role FROM kc_users WHERE id=? AND active=1",(user_id,)).fetchone()
         if not user: raise HTTPException(503,"Demo workspace is not initialized")
         response=JSONResponse({"next":"/app" if role=="admin" else "/employee" if role=="employee" else "/recipient"})
