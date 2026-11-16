@@ -1,9 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "server.py": {
-      "includeFiles": "*.html",
-      "maxDuration": 60
+  "builds": [
+    {
+      "src": "server.py",
+      "use": "@vercel/python@17.0.2",
+      "config": {
+        "includeFiles": "*.{html,js}",
+        "maxDuration": 60
+      }
     }
-  }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "server.py" }
+  ]
 }
