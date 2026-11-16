@@ -467,7 +467,9 @@ def ensure_demo_fields(db: sqlite3.Connection, handover_id: str) -> None:
         field=db.execute("SELECT * FROM kc_fields WHERE handover_id=? AND key=?",(handover_id,key)).fetchone()
         if not field or (field["state"]!="Missing" and field["value"].strip()):
             continue
-        passage=db.execute("SELECT id,text FROM kc_passages WHERE source_id=? AND instr(text,?)>0 ORDER BY ordinal LIMIT 1",(source_id,needle)).fetchone()
+        # `instr` is SQLite-specific; POSITION is the equivalent in Postgres.
+        contains = "POSITION(? IN text)>0" if USE_POSTGRES else "instr(text,?)>0"
+        passage=db.execute(f"SELECT id,text FROM kc_passages WHERE source_id=? AND {contains} ORDER BY ordinal LIMIT 1",(source_id,needle)).fetchone()
         if not passage: continue
         cite=[{"passage_id":passage["id"],"quote":passage["text"]}]
         note="Source statements disagree; owner must decide before treating the display rule as settled." if key=="calculations" else ""
