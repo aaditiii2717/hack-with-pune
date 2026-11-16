@@ -3,7 +3,7 @@
   "builds": [
     {
       "src": "server.py",
-      "use": "@vercel/python@32.0.0",
+      "use": "@vercel/python",
       "config": {
         "includeFiles": "*.{html,js}",
         "maxDuration": 60
